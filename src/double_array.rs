@@ -15,7 +15,10 @@ impl<T> DoubleArray<T> {
         }
     }
 
-    pub fn find(&self, key: &str) -> Option<&[T]> {
+    #[inline]
+    pub fn len(&self) -> usize { self.base.len() }
+
+    pub fn get(&self, key: &str) -> Option<&[T]> {
         let mut current_ix = 1;
         for ch in key.encode_utf16() {
             let next_ix = self.base[current_ix] as usize + ch as usize;
@@ -43,20 +46,14 @@ impl<T> DoubleArray<T> {
                 current_ix = next_ix;
                 if let Some(v) = self.data.get(current_ix) {
                     if v.len() > 0 {
-                        f(Self::decode_utf16(&chars), &v[..]);
+                        f(decode_utf16(&chars), &v[..]);
                     }
                 }
             }
         }
     }
 
-    fn decode_utf16(chars: &[u16]) -> String {
-        std::char::decode_utf16(chars.iter().cloned())
-            .filter_map(Result::ok)
-            .collect()
-    }
-
-    pub fn add(&mut self, key: &str, value: T) {
+    pub fn insert(&mut self, key: &str, value: T) {
         let (mut current_ix, key_ix) = self.find_failed_position(key);
         for (ix, ch) in key.encode_utf16().enumerate() {
             if ix < key_ix { continue; }
@@ -167,6 +164,13 @@ impl<T: std::fmt::Debug> DoubleArray<T> {
     }
 }
 
+fn decode_utf16(chars: &[u16]) -> String {
+    std::char::decode_utf16(chars.iter().cloned())
+        .filter_map(Result::ok)
+        .collect()
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -175,95 +179,95 @@ mod tests {
     // "未登録の要素を取り出そうとするとNoneを返す"
     fn test_not_registered() {
         let pt: DoubleArray<()> = DoubleArray::new();
-        assert_eq!(pt.find("abc"), None);
+        assert_eq!(pt.get("abc"), None);
     }
 
     #[test]
     // "配列の長さが足りない場合はNoneを返す"
     fn test_small() {
         let pt: DoubleArray<()> = DoubleArray::new();
-        assert_eq!(pt.find("abc"), None);
+        assert_eq!(pt.get("abc"), None);
     }
 
     #[test]
     // "途中までのキーが登録されている場合はNoneを返す"
     fn test_mid() {
         let mut pt = DoubleArray::new();
-        pt.add("ab", 1);
-        assert_eq!(pt.find("abc"), None);
+        pt.insert("ab", 1);
+        assert_eq!(pt.get("abc"), None);
     }
 
     #[test]
     // "遷移は可能だがdataが登録されていない場合はNoneを返す"
     fn test_over() {
         let mut pt = DoubleArray::new();
-        pt.add("abcd", 1);
-        assert_eq!(pt.find("abc"), None);
+        pt.insert("abcd", 1);
+        assert_eq!(pt.get("abc"), None);
     }
 
     #[test]
     // "衝突しない要素の登録"
     fn test_no_conflict() {
         let mut pt = DoubleArray::new();
-        pt.add("abc", 1);
-        pt.add("ab", 2);
-        assert_eq!(pt.find("abc"), Some(&[1][..]));
-        assert_eq!(pt.find("ab"), Some(&[2][..]));
+        pt.insert("abc", 1);
+        pt.insert("ab", 2);
+        assert_eq!(pt.get("abc"), Some(&[1][..]));
+        assert_eq!(pt.get("ab"), Some(&[2][..]));
     }
 
     #[test]
     // "重複していない値の登録"
     fn test_dup_value() {
         let mut pt = DoubleArray::new();
-        pt.add("ab", 1);
-        pt.add("ab", 2);
-        assert_eq!(pt.find("ab"), Some(&[1, 2][..]));
+        pt.insert("ab", 1);
+        pt.insert("ab", 2);
+        assert_eq!(pt.get("ab"), Some(&[1, 2][..]));
     }
 
     #[test]
     // "衝突する場合"
     fn test_conflict() {
         let mut pt = DoubleArray::new();
-        pt.add("abc", 1);
-        pt.add("ad", 2);
-        pt.add("ac", 3);
+        pt.insert("abc", 1);
+        pt.insert("ad", 2);
+        pt.insert("ac", 3);
 
-        assert_eq!(pt.find("abc"), Some(&[1][..]));
-        assert_eq!(pt.find("ad"), Some(&[2][..]));
-        assert_eq!(pt.find("ac"), Some(&[3][..]));
+        assert_eq!(pt.get("abc"), Some(&[1][..]));
+        assert_eq!(pt.get("ad"), Some(&[2][..]));
+        assert_eq!(pt.get("ac"), Some(&[3][..]));
     }
 
     #[test]
     // "マルチバイト文字"
     fn test_multibyte() {
         let mut pt = DoubleArray::new();
-        pt.add("おはよう", 1);
-        pt.add("およごう", 2);
+        pt.insert("おはよう", 1);
+        pt.insert("およごう", 2);
 
-        assert_eq!(pt.find("おはよう"), Some(&[1][..]));
-        assert_eq!(pt.find("およごう"), Some(&[2][..]));
+        assert_eq!(pt.get("おはよう"), Some(&[1][..]));
+        assert_eq!(pt.get("およごう"), Some(&[2][..]));
     }
 
     #[test]
     // "遷移先ノードを正確に取得できているか"
     fn test_transite() {
         let mut pt = DoubleArray::new();
-        pt.add("ba", 1);
-        pt.add("bb", 2);
+        pt.insert("ba", 1);
+        pt.insert("bb", 2);
 
-        assert_eq!(pt.find("ba"), Some(&[1][..]));
-        assert_eq!(pt.find("bb"), Some(&[2][..]));
+        assert_eq!(pt.get("ba"), Some(&[1][..]));
+        assert_eq!(pt.get("bb"), Some(&[2][..]));
     }
 
     #[test]
     // "前方一致検索。"
     fn test_prefix() {
         let mut pt = DoubleArray::new();
-        pt.add("abc", 1);
-        pt.add("ad", 2);
-        pt.add("ac", 3);
-        pt.add("a", 4);
-        pt.add("a", 5);
+        pt.insert("abc", 1);
+        pt.insert("ad", 2);
+        pt.insert("ac", 3);
+        pt.insert("a", 4);
+        pt.insert("a", 5);
 
         let mut vec = vec![];
         pt.each_prefix("abcd", |string, data| {

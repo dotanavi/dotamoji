@@ -1,3 +1,1 @@
-mod double_array;
-
-pub use double_array::DoubleArray;
+pub mod double_array;
