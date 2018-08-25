@@ -3,6 +3,7 @@ use std::{char, u16, cmp::min, iter::once, fmt::Debug};
 #[derive(Eq, PartialEq)]
 enum Index { Ok, Empty, Conflict, OutOfRange }
 
+#[derive(Serialize, Deserialize)]
 pub struct DoubleArray<T> {
     base: Vec<u32>,
     check: Vec<u32>,
@@ -47,7 +48,7 @@ impl<T> DoubleArray<T> {
                 current_ix = next_ix;
                 if let Some(v) = self.data.get(current_ix) {
                     if v.len() > 0 {
-                        f(decode_utf16(&chars), &v[..]);
+                        f(super::decode_utf16(&chars), &v[..]);
                     }
                 }
             }
@@ -115,13 +116,13 @@ impl<T> DoubleArray<T> {
         self.base[current_ix] = new_base as u32;
         for ch in next_nodes {
             let src_ix = current_base + ch as usize;
-            let src_base = self.base[src_ix] as usize;
             let dst_ix = new_base as usize + ch as usize;
 
+            // 3. 遷移先ノードを新しい base で計算した index にコピー
             debug_assert!(self.base[dst_ix] == 0);
             debug_assert!(self.check[dst_ix] == 0);
             debug_assert!(self.data[dst_ix].len() == 0);
-            // 3. 遷移先ノードを新しい base で計算した index にコピー
+            let src_base = self.base[src_ix] as usize;
             self.base[dst_ix] = self.base[src_ix];
             self.check[dst_ix] = self.check[src_ix];
             self.data.swap(src_ix, dst_ix);
@@ -183,13 +184,6 @@ impl<T: Debug> DoubleArray<T> {
         }
     }
 }
-
-fn decode_utf16(chars: &[u16]) -> String {
-    char::decode_utf16(chars.iter().cloned())
-        .filter_map(Result::ok)
-        .collect()
-}
-
 
 #[cfg(test)]
 mod tests {
