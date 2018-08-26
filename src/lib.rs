@@ -2,8 +2,19 @@
 extern crate serde_derive;
 extern crate serde;
 
-pub mod double_array;
-pub mod staged_hash;
+mod double_array;
+mod recursive_hash_map;
+
+pub use double_array::DoubleArray;
+pub use recursive_hash_map::RecursiveHashMap;
+
+pub trait PrefixTree<T> {
+    fn new() -> Self;
+    fn len(&self) -> usize;
+    fn get(&self, key: &str) -> Option<&[T]>;
+    fn each_prefix<F: FnMut(String, &[T])>(&self, key: &str, f: F);
+    fn insert(&mut self, key: &str, value: T);
+}
 
 fn decode_utf16(chars: &[u16]) -> String {
     use std::char;

@@ -1,22 +1,23 @@
 use std::collections::HashMap;
+use super::PrefixTree;
 
 #[derive(Serialize, Deserialize)]
-pub struct StagedHash<T> {
+pub struct RecursiveHashMap<T> {
     id: u32,
     link: HashMap<(u32, u16), u32>,
     data: HashMap<u32, Vec<T>>,
 }
 
-impl<T> StagedHash<T> {
+impl<T> PrefixTree<T> for RecursiveHashMap<T> {
     #[inline]
-    pub fn new() -> Self {
+    fn new() -> Self {
         Self { id: 0, link: HashMap::new(), data: HashMap::new() }
     }
 
     #[inline]
-    pub fn len(&self) -> usize { self.data.len() }
+    fn len(&self) -> usize { self.data.len() }
 
-    pub fn get(&self, key: &str) -> Option<&[T]> {
+    fn get(&self, key: &str) -> Option<&[T]> {
         let mut current_id = 0;
         for ch in key.encode_utf16() {
             match self.link.get(&(current_id, ch)) {
@@ -30,7 +31,7 @@ impl<T> StagedHash<T> {
         }
     }
 
-    pub fn each_prefix<F: FnMut(String, &[T])>(&self, key: &str, mut f: F) {
+    fn each_prefix<F: FnMut(String, &[T])>(&self, key: &str, mut f: F) {
         let mut chars: Vec<u16> = vec![];
         let mut current_id = 0;
         for ch in key.encode_utf16() {
@@ -47,7 +48,7 @@ impl<T> StagedHash<T> {
         }
     }
 
-    pub fn insert(&mut self, key: &str, value: T) {
+    fn insert(&mut self, key: &str, value: T) {
         let id = &mut self.id;
         let link = &mut self.link;
         let data = &mut self.data;
@@ -71,21 +72,21 @@ mod tests {
     #[test]
     // "未登録の要素を取り出そうとするとNoneを返す"
     fn test_not_registered() {
-        let pt: StagedHash<()> = StagedHash::new();
+        let pt: RecursiveHashMap<()> = RecursiveHashMap::new();
         assert_eq!(pt.get("abc"), None);
     }
 
     #[test]
     // "配列の長さが足りない場合はNoneを返す"
     fn test_small() {
-        let pt: StagedHash<()> = StagedHash::new();
+        let pt: RecursiveHashMap<()> = RecursiveHashMap::new();
         assert_eq!(pt.get("abc"), None);
     }
 
     #[test]
     // "途中までのキーが登録されている場合はNoneを返す"
     fn test_mid() {
-        let mut pt = StagedHash::new();
+        let mut pt = RecursiveHashMap::new();
         pt.insert("ab", 1);
         assert_eq!(pt.get("abc"), None);
     }
@@ -93,7 +94,7 @@ mod tests {
     #[test]
     // "遷移は可能だがdataが登録されていない場合はNoneを返す"
     fn test_over() {
-        let mut pt = StagedHash::new();
+        let mut pt = RecursiveHashMap::new();
         pt.insert("abcd", 1);
         assert_eq!(pt.get("abc"), None);
     }
@@ -101,7 +102,7 @@ mod tests {
     #[test]
     // "衝突しない要素の登録"
     fn test_no_conflict() {
-        let mut pt = StagedHash::new();
+        let mut pt = RecursiveHashMap::new();
         pt.insert("abc", 1);
         pt.insert("ab", 2);
         assert_eq!(pt.get("abc"), Some(&[1][..]));
@@ -111,7 +112,7 @@ mod tests {
     #[test]
     // "重複していない値の登録"
     fn test_dup_value() {
-        let mut pt = StagedHash::new();
+        let mut pt = RecursiveHashMap::new();
         pt.insert("ab", 1);
         pt.insert("ab", 2);
         assert_eq!(pt.get("ab"), Some(&[1, 2][..]));
@@ -120,7 +121,7 @@ mod tests {
     #[test]
     // "衝突する場合"
     fn test_conflict() {
-        let mut pt = StagedHash::new();
+        let mut pt = RecursiveHashMap::new();
         pt.insert("abc", 1);
         pt.insert("ad", 2);
         pt.insert("ac", 3);
@@ -133,7 +134,7 @@ mod tests {
     #[test]
     // "マルチバイト文字"
     fn test_multibyte() {
-        let mut pt = StagedHash::new();
+        let mut pt = RecursiveHashMap::new();
         pt.insert("おはよう", 1);
         pt.insert("およごう", 2);
 
@@ -144,7 +145,7 @@ mod tests {
     #[test]
     // "遷移先ノードを正確に取得できているか"
     fn test_transite() {
-        let mut pt = StagedHash::new();
+        let mut pt = RecursiveHashMap::new();
         pt.insert("ba", 1);
         pt.insert("bb", 2);
 
@@ -155,7 +156,7 @@ mod tests {
     #[test]
     // "前方一致検索。"
     fn test_prefix() {
-        let mut pt = StagedHash::new();
+        let mut pt = RecursiveHashMap::new();
         pt.insert("abc", 1);
         pt.insert("ad", 2);
         pt.insert("ac", 3);

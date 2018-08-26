@@ -1,4 +1,5 @@
 use std::{char, u16, cmp::min, iter::once, fmt::Debug};
+use super::PrefixTree;
 
 #[derive(Eq, PartialEq)]
 enum Index { Ok, Empty, Conflict, OutOfRange }
@@ -11,6 +12,7 @@ pub struct DoubleArray<T> {
 }
 
 impl<T> DoubleArray<T> {
+    #[inline]
     pub fn new() -> Self {
         DoubleArray {
             base: vec![0, 1],
@@ -183,6 +185,19 @@ impl<T: Debug> DoubleArray<T> {
                 i, self.base[i], self.check[i], ch.unwrap(), self.data[i]);
         }
     }
+}
+
+impl<T> PrefixTree<T> for DoubleArray<T> {
+    #[inline]
+    fn new() -> Self { DoubleArray::new() }
+    #[inline]
+    fn len(&self) -> usize { self.len() }
+    #[inline]
+    fn get(&self, key: &str) -> Option<&[T]> { self.get(key) }
+    #[inline]
+    fn each_prefix<F: FnMut(String, &[T])>(&self, key: &str, f: F) { self.each_prefix(key, f) }
+    #[inline]
+    fn insert(&mut self, key: &str, value: T) { self.insert(key, value) }
 }
 
 #[cfg(test)]
