@@ -3,7 +3,6 @@ extern crate dotamoji;
 
 use std::env;
 use std::io::{self, BufRead};
-use std::fs::File;
 
 use dotamoji::*;
 
@@ -15,9 +14,7 @@ fn main() {
     if args.len() <= 1 {
         panic!("ファイルが指定されていません。");
     }
-    let f = &args[1];
-    let file = File::open(&f).unwrap_or_else(|_| panic!("ファイルが開けません"));
-    let da: Dic = bincode::deserialize_from(file).unwrap_or_else(|_| panic!("辞書の復元に失敗しました。"));
+    let da: Dic = dotamoji::util::load_from_file(&args[1]);
 
     let stdin = io::stdin();
     let mut cnt = 0;

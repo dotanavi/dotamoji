@@ -143,6 +143,17 @@ impl<T> DoubleArray<T> {
     }
 
     fn find_new_base(&mut self, next_nodes: &[u16], ch: u16) -> usize {
+        if next_nodes.len() == 0 {
+            for i in ch as usize + 1 .. self.check.len() {
+                if self.check[i] == 0 {
+                    return i - ch as usize;
+                }
+            }
+            let len = self.check.len();
+            self.extend(len + 1);
+            return len - ch as usize;
+        }
+
         let mut new_base = 0;
         'out: loop {
             new_base += 1;

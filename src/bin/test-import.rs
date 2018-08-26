@@ -2,20 +2,20 @@ extern crate bincode;
 extern crate dotamoji;
 
 use std::env;
-use std::fs::File;
 
 use dotamoji::*;
-
-// type Dic = DoubleArray<()>;
-type Dic = RecursiveHashMap<()>;
+use dotamoji::util::load_from_file;
 
 fn main() {
-    let args = env::args().collect::<Vec<_>>();
-    if args.len() <= 1 {
-        panic!("ファイルが指定されていません。");
-    }
-    let f = &args[1];
-    let file = File::open(&f).unwrap_or_else(|_| panic!("ファイルが開けません"));
-    let da: Dic = bincode::deserialize_from(file).unwrap_or_else(|_| panic!("辞書の復元に失敗しました。"));
-    println!("len = {}", da.len());
+    let mut args = env::args();
+    let _ = args.next().unwrap_or_else(|| panic!("実行ファイルが不明！？"));
+    let dictype: String = args.next().unwrap_or_else(|| panic!("タイプが指定されていません。"));
+    let file = args.next().unwrap_or_else(|| panic!("ファイルが指定されていません。"));
+
+    let len = match dictype.as_str() {
+        "array" => load_from_file::<DoubleArray<()>>(&file).len(),
+        "hash" => load_from_file::<RecursiveHashMap<()>>(&file).len(),
+        _ => panic!("不明なタイプです。"),
+    };
+    println!("len = {}", len);
 }

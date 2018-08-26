@@ -1,36 +1,33 @@
-extern crate bincode;
+extern crate serde;
 extern crate dotamoji;
 
 use std::env;
 use std::io::{self, BufRead};
-use std::fs::File;
+use serde::{Serialize, de::DeserializeOwned};
 
 use dotamoji::*;
 
-// type Dic = DoubleArray<()>;
-type Dic = RecursiveHashMap<()>;
-
-fn main() {
-    let args = env::args().collect::<Vec<_>>();
-    if args.len() <= 1 {
-        panic!("ファイルが指定されていません。");
-    }
-    let f = &args[1];
-
+fn build<T: PrefixTree<()> + Serialize + DeserializeOwned>(file: &str) {
     let stdin = io::stdin();
-    let mut dic = Dic::new();
+    let mut dic = T::new();
     for line in stdin.lock().lines().filter_map(Result::ok) {
         let word = line.split(",").next().unwrap();
         dic.insert(word, ());
     }
+    dotamoji::util::save_to_file(file, &dic);
+    let _: T = dotamoji::util::load_from_file(file);
+    println!("{} を作成しました。", file);
+}
 
-    {
-        let file = File::create(&f).unwrap_or_else(|_| panic!("ファイルを作成できません。"));
-        bincode::serialize_into(file, &dic).unwrap_or_else(|_| panic!("保存に失敗しました。"));
+fn main() {
+    let mut args = env::args();
+    let _ = args.next().unwrap_or_else(|| panic!("実行ファイルが不明！？"));
+    let dictype: String = args.next().unwrap_or_else(|| panic!("タイプが指定されていません。"));
+    let file = args.next().unwrap_or_else(|| panic!("ファイルが指定されていません。"));
+
+    match dictype.as_str() {
+        "array" => build::<DoubleArray<()>>(&file),
+        "hash" => build::<RecursiveHashMap<()>>(&file),
+        _ => panic!("不明なタイプです。"),
     }
-    {
-        let file = File::open(&f).unwrap_or_else(|_| panic!("ファイルが開けません"));
-        let _: Dic = bincode::deserialize_from(file).unwrap_or_else(|_| panic!("辞書の復元に失敗しました。"));
-    }
-    println!("{} を作成しました。", f);
 }
