@@ -23,11 +23,7 @@ fn main() {
     let mut cnt = 0;
     for line in stdin.lock().lines().filter_map(Result::ok) {
         let word = line.split(",").next().unwrap();
-        if let Some(_) = da.get(word) {
-            cnt += 1;
-        } else {
-            panic!("{} が見つかりません。", word);
-        }
+        da.each_prefix(word, |_, v| cnt += v.len())
     }
-    println!("{} 件のデータすべてが存在しました。", cnt);
+    println!("全 {}", cnt);
 }

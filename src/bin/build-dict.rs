@@ -7,8 +7,8 @@ use std::fs::File;
 
 use dotamoji::*;
 
-type Dic = DoubleArray<()>;
-// type Dic = StagedHash<()>;
+// type Dic = DoubleArray<()>;
+type Dic = RecursiveHashMap<()>;
 
 fn main() {
     let args = env::args().collect::<Vec<_>>();

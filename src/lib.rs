@@ -12,14 +12,16 @@ pub trait PrefixTree<T> {
     fn new() -> Self;
     fn len(&self) -> usize;
     fn get(&self, key: &str) -> Option<&[T]>;
-    fn each_prefix<F: FnMut(String, &[T])>(&self, key: &str, f: F);
+    fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, f: F);
     fn insert(&mut self, key: &str, value: T);
 }
 
-fn decode_utf16(chars: &[u16]) -> String {
-    use std::char;
+pub mod util {
+    pub fn decode_utf16(chars: &[u16]) -> String {
+        use std::char;
 
-    char::decode_utf16(chars.iter().cloned())
-        .filter_map(Result::ok)
-        .collect()
+        char::decode_utf16(chars.iter().cloned())
+            .filter_map(Result::ok)
+            .collect()
+    }
 }

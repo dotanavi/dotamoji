@@ -41,7 +41,7 @@ impl<T> DoubleArray<T> {
         }
     }
 
-    pub fn each_prefix<F: FnMut(String, &[T])>(&self, key: &str, mut f: F) {
+    pub fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, mut f: F) {
         let mut chars: Vec<u16> = vec![];
         let mut current_ix = 1;
         for ch in key.encode_utf16() {
@@ -50,7 +50,7 @@ impl<T> DoubleArray<T> {
                 current_ix = next_ix;
                 if let Some(v) = self.data.get(current_ix) {
                     if v.len() > 0 {
-                        f(super::decode_utf16(&chars), &v[..]);
+                        f(&chars, &v[..]);
                     }
                 }
             }
@@ -195,7 +195,7 @@ impl<T> PrefixTree<T> for DoubleArray<T> {
     #[inline]
     fn get(&self, key: &str) -> Option<&[T]> { self.get(key) }
     #[inline]
-    fn each_prefix<F: FnMut(String, &[T])>(&self, key: &str, f: F) { self.each_prefix(key, f) }
+    fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, f: F) { self.each_prefix(key, f) }
     #[inline]
     fn insert(&mut self, key: &str, value: T) { self.insert(key, value) }
 }
@@ -291,6 +291,8 @@ mod tests {
     #[test]
     // "前方一致検索。"
     fn test_prefix() {
+        use super::super::util::decode_utf16;
+
         let mut pt = DoubleArray::new();
         pt.insert("abc", 1);
         pt.insert("ad", 2);
@@ -299,8 +301,8 @@ mod tests {
         pt.insert("a", 5);
 
         let mut vec = vec![];
-        pt.each_prefix("abcd", |string, data| {
-            vec.push((string, data.to_owned()));
+        pt.each_prefix("abcd", |chars, data| {
+            vec.push((decode_utf16(chars), data.to_owned()));
         });
         assert_eq!(vec, vec![
             ("a".to_string(), vec![4, 5]),

@@ -31,7 +31,7 @@ impl<T> PrefixTree<T> for RecursiveHashMap<T> {
         }
     }
 
-    fn each_prefix<F: FnMut(String, &[T])>(&self, key: &str, mut f: F) {
+    fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, mut f: F) {
         let mut chars: Vec<u16> = vec![];
         let mut current_id = 0;
         for ch in key.encode_utf16() {
@@ -40,7 +40,7 @@ impl<T> PrefixTree<T> for RecursiveHashMap<T> {
                 Some(next_id) => {
                     chars.push(ch);
                     if let Some(vec) = self.data.get(next_id) {
-                        f(super::decode_utf16(&chars), &vec[..]);
+                        f(&chars, &vec[..]);
                     }
                     current_id = *next_id;
                 }
@@ -156,6 +156,8 @@ mod tests {
     #[test]
     // "前方一致検索。"
     fn test_prefix() {
+        use super::super::util::decode_utf16;
+
         let mut pt = RecursiveHashMap::new();
         pt.insert("abc", 1);
         pt.insert("ad", 2);
@@ -164,8 +166,8 @@ mod tests {
         pt.insert("a", 5);
 
         let mut vec = vec![];
-        pt.each_prefix("abcd", |string, data| {
-            vec.push((string, data.to_owned()));
+        pt.each_prefix("abcd", |chars, data| {
+            vec.push((decode_utf16(chars), data.to_owned()));
         });
         assert_eq!(vec, vec![
             ("a".to_string(), vec![4, 5]),
