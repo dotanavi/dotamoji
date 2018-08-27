@@ -1,13 +1,11 @@
-extern crate serde;
 extern crate dotamoji;
 
 use std::env;
 use std::io::{self, BufRead};
-use serde::{Serialize, de::DeserializeOwned};
 
 use dotamoji::*;
 
-fn build<T: Dictionary<()> + Serialize + DeserializeOwned>(file: &str) {
+fn build<T: SerdeDic<()>>(file: &str) {
     let stdin = io::stdin();
     let mut dic = T::new();
     for line in stdin.lock().lines().filter_map(Result::ok) {

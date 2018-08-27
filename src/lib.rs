@@ -3,6 +3,7 @@ extern crate serde_derive;
 extern crate serde;
 extern crate bincode;
 
+use serde::{Serialize, de::DeserializeOwned};
 mod double_array;
 mod recursive_hash_map;
 
@@ -17,11 +18,14 @@ pub trait Dictionary<T> {
     fn insert(&mut self, key: &str, value: T);
 }
 
+pub trait SerdeDic<T>: Dictionary<T> + Serialize + DeserializeOwned {}
+
+impl<T, D> SerdeDic<T> for D where D: Dictionary<T> + Serialize + DeserializeOwned {}
+
 pub mod util {
     use super::*;
     use std::io::{BufReader, BufWriter};
     use std::fs::File;
-    use serde::{Serialize, de::DeserializeOwned};
 
     pub fn decode_utf16(chars: &[u16]) -> String {
         use std::char;
