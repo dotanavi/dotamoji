@@ -1,4 +1,4 @@
-use std::{char, u16, cmp::min, iter::once, fmt::Debug};
+use std::{char, u16, cmp::{max, min}, iter::once, fmt::Debug};
 use super::Dictionary;
 
 #[derive(Eq, PartialEq)]
@@ -149,9 +149,9 @@ impl<T> DoubleArray<T> {
                     return i - ch as usize;
                 }
             }
-            let len = self.check.len();
-            self.extend(len + 1);
-            return len - ch as usize;
+            let pos = max(self.check.len(), ch as usize + 1);
+            self.extend(pos + 1);
+            return pos - ch as usize;
         }
 
         let mut new_base = 0;
