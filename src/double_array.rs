@@ -2,7 +2,7 @@ use std::{char, u16, cmp::{max, min}, iter::once, fmt::Debug};
 use super::Dictionary;
 
 #[derive(Eq, PartialEq)]
-enum Index { Ok, Empty, Conflict, OutOfRange }
+enum Index { Zero, Transit, Empty, Conflict, OutOfRange }
 
 #[derive(Serialize, Deserialize)]
 pub struct DoubleArray<T> {
@@ -15,7 +15,7 @@ impl<T> DoubleArray<T> {
     #[inline]
     pub fn new() -> Self {
         DoubleArray {
-            base: vec![0, 1],
+            base: vec![0, 0],
             check: vec![0, 0],
             data: vec![vec![], vec![]],
         }
@@ -27,7 +27,7 @@ impl<T> DoubleArray<T> {
     pub fn get(&self, key: &str) -> Option<&[T]> {
         let mut current_ix = 1;
         for ch in key.encode_utf16() {
-            if let (Index::Ok, next_ix) = self.next_index(current_ix, ch) {
+            if let (Index::Transit, next_ix) = self.next_index(current_ix, ch) {
                 current_ix = next_ix;
             } else {
                 return None;
@@ -46,7 +46,7 @@ impl<T> DoubleArray<T> {
         let mut current_ix = 1;
         for ch in key.encode_utf16() {
             chars.push(ch);
-            if let (Index::Ok, next_ix) = self.next_index(current_ix, ch) {
+            if let (Index::Transit, next_ix) = self.next_index(current_ix, ch) {
                 current_ix = next_ix;
                 if let Some(v) = self.data.get(current_ix) {
                     if v.len() > 0 {
@@ -59,11 +59,15 @@ impl<T> DoubleArray<T> {
 
     #[inline]
     fn next_index(&self, current_index: usize, ch: u16) -> (Index, usize) {
-        let next_ix = self.base[current_index] as usize + ch as usize;
+        let current_base = self.base[current_index];
+        if current_base == 0 {
+            return (Index::Zero, 0);
+        }
+        let next_ix = current_base as usize + ch as usize;
         if next_ix < self.check.len() {
             let check_ix = self.check[next_ix] as usize;
             if check_ix == current_index {
-                (Index::Ok, next_ix)
+                (Index::Transit, next_ix)
             } else if check_ix == 0 {
                 (Index::Empty, next_ix)
             } else {
@@ -79,9 +83,13 @@ impl<T> DoubleArray<T> {
         for ch in key.encode_utf16() {
             let (state, next_ix) = self.next_index(current_ix, ch);
             current_ix = match state {
-                Index::Ok => next_ix,
+                Index::Transit => next_ix,
                 Index::Empty => {
                     self.update(current_ix, next_ix)
+                }
+                Index::Zero => {
+                    let new_next_ix = self.put_first_one(current_ix, ch);
+                    self.update(current_ix, new_next_ix)
                 }
                 Index::Conflict => {
                     let new_next_ix = self.rebase(current_ix, ch);
@@ -99,13 +107,33 @@ impl<T> DoubleArray<T> {
 
     #[inline]
     fn update(&mut self, current_ix: usize, next_ix: usize) -> usize {
-        self.base[next_ix] = 1;
+        self.base[next_ix] = 0;
         self.check[next_ix] = current_ix as u32;
         next_ix
     }
 
+    #[inline]
+    fn put_first_one(&mut self, current_ix: usize, ch: u16) -> usize {
+        let new_base = self.find_new_base_one(ch);
+        self.base[current_ix] = new_base as u32;
+        return new_base as usize + ch as usize
+    }
+
+    #[inline]
+    fn find_new_base_one(&mut self, ch: u16) -> usize {
+        for i in ch as usize + 1 .. self.check.len() {
+            if self.check[i] == 0 {
+                return i - ch as usize;
+            }
+        }
+        let pos = max(self.check.len(), ch as usize + 1);
+        self.extend(pos + 1);
+        return pos - ch as usize;
+    }
+
     fn rebase(&mut self, current_ix: usize, ch: u16) -> usize {
         let current_base = self.base[current_ix] as usize;
+        debug_assert!(current_base > 0);
         // 1. currIdx から遷移しているすべてのノード(遷移先ノード)を取得 (index, char)
         let mut next_nodes = vec![];
         for i in current_base .. min(self.check.len(), current_base + u16::MAX as usize) {
@@ -113,6 +141,7 @@ impl<T> DoubleArray<T> {
                 next_nodes.push((i - current_base) as u16);
             }
         }
+        debug_assert!(next_nodes.len() > 0);
         // 2. 遷移先ノードと currChar が遷移可能なbaseを求める
         let new_base = self.find_new_base(&next_nodes, ch);
         self.base[current_ix] = new_base as u32;
@@ -129,10 +158,14 @@ impl<T> DoubleArray<T> {
             self.check[dst_ix] = self.check[src_ix];
             self.data.swap(src_ix, dst_ix);
 
-            // 4. 旧遷移先ノードから更に遷移しているノードの check を新遷移先ノードの index で更新
-            for i in src_base .. min(self.check.len(), src_base + u16::MAX as usize) {
-                if self.check[i] as usize == src_ix {
-                    self.check[i] = dst_ix as u32;
+            if src_base > 0 {
+                // 4. 旧遷移先ノードから更に遷移しているノードの check を新遷移先ノードの index で更新
+                let src_ix = src_ix as u32;
+                let dst_ix = dst_ix as u32;
+                for i in src_base .. min(self.check.len(), src_base + u16::MAX as usize) {
+                    if self.check[i] == src_ix {
+                        self.check[i] = dst_ix;
+                    }
                 }
             }
             // 5. 旧遷移先ノードの base, check, data をリセット
@@ -143,17 +176,7 @@ impl<T> DoubleArray<T> {
     }
 
     fn find_new_base(&mut self, next_nodes: &[u16], ch: u16) -> usize {
-        if next_nodes.len() == 0 {
-            for i in ch as usize + 1 .. self.check.len() {
-                if self.check[i] == 0 {
-                    return i - ch as usize;
-                }
-            }
-            let pos = max(self.check.len(), ch as usize + 1);
-            self.extend(pos + 1);
-            return pos - ch as usize;
-        }
-
+        debug_assert!(next_nodes.len() > 0);
         let mut new_base = 0;
         'out: loop {
             new_base += 1;
