@@ -13,7 +13,7 @@ fn build<T: SerdeDic<()>>(file: &str) {
         dic.insert(word, ());
     }
     dotamoji::util::save_to_file(file, &dic);
-    let _: T = dotamoji::util::load_from_file(file);
+    // let _: T = dotamoji::util::load_from_file(file);
     println!("{} を作成しました。", file);
 }
 
