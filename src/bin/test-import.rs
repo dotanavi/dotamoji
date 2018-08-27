@@ -4,17 +4,20 @@ extern crate dotamoji;
 use std::env;
 
 use dotamoji::*;
-use dotamoji::util::load_from_file;
+
+fn len<T: SerdeDic<()>>(file: &str) -> usize {
+    T::load_from_file(&file).len()
+}
 
 fn main() {
     let mut args = env::args();
-    let _ = args.next().unwrap_or_else(|| panic!("実行ファイルが不明！？"));
-    let dictype: String = args.next().unwrap_or_else(|| panic!("タイプが指定されていません。"));
-    let file = args.next().unwrap_or_else(|| panic!("ファイルが指定されていません。"));
+    let _ = args.next().expect("実行ファイルが不明！？");
+    let dictype = args.next().expect("タイプが指定されていません。");
+    let file = args.next().expect("ファイルが指定されていません。");
 
     let len = match dictype.as_str() {
-        "array" => load_from_file::<DoubleArray<()>>(&file).len(),
-        "hash" => load_from_file::<RecursiveHashMap<()>>(&file).len(),
+        "array" => len::<DoubleArray<()>>(&file),
+        "hash" => len::<RecursiveHashMap<()>>(&file),
         _ => panic!("不明なタイプです。"),
     };
     println!("len = {}", len);

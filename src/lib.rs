@@ -3,7 +3,10 @@ extern crate serde_derive;
 extern crate serde;
 extern crate bincode;
 
+use std::fs::File;
+use std::io::{BufReader, BufWriter};
 use serde::{Serialize, de::DeserializeOwned};
+
 mod double_array;
 mod recursive_hash_map;
 
@@ -18,32 +21,28 @@ pub trait Dictionary<T> {
     fn insert(&mut self, key: &str, value: T);
 }
 
-pub trait SerdeDic<T>: Dictionary<T> + Serialize + DeserializeOwned {}
+pub trait SerdeDic<T>: Dictionary<T> + Serialize + DeserializeOwned {
+    fn load_from_file(file: &str) -> Self {
+        let file = File::open(file).expect("ファイルが開けません");
+        let file = BufReader::new(file);
+        bincode::deserialize_from(file).expect("辞書の復元に失敗しました。")
+    }
+
+    fn save_to_file(&self, file: &str) {
+        let file = File::create(file).expect("ファイルを作成できません。");
+        let file = BufWriter::new(file);
+        bincode::serialize_into(file, self).expect("保存に失敗しました。");
+    }
+}
 
 impl<T, D> SerdeDic<T> for D where D: Dictionary<T> + Serialize + DeserializeOwned {}
 
 pub mod util {
-    use super::*;
-    use std::io::{BufReader, BufWriter};
-    use std::fs::File;
-
     pub fn decode_utf16(chars: &[u16]) -> String {
         use std::char;
 
         char::decode_utf16(chars.iter().cloned())
             .filter_map(Result::ok)
             .collect()
-    }
-
-    pub fn load_from_file<T: DeserializeOwned>(file: &str) -> T {
-        let file = File::open(file).unwrap_or_else(|_| panic!("ファイルが開けません"));
-        let file = BufReader::new(file);
-        bincode::deserialize_from(file).unwrap_or_else(|_| panic!("辞書の復元に失敗しました。"))
-    }
-
-    pub fn save_to_file<T: Serialize>(file: &str, dic: &T) {
-        let file = File::create(file).unwrap_or_else(|_| panic!("ファイルを作成できません。"));
-        let file = BufWriter::new(file);
-        bincode::serialize_into(file, &dic).unwrap_or_else(|_| panic!("保存に失敗しました。"));
     }
 }

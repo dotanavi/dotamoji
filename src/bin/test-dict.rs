@@ -6,7 +6,7 @@ use std::io::{self, BufRead};
 use dotamoji::*;
 
 fn test_all<T: SerdeDic<()>>(file: &str) {
-    let dic: T = dotamoji::util::load_from_file(file);
+    let dic = T::load_from_file(file);
 
     let stdin = io::stdin();
     let mut cnt = 0;
@@ -23,9 +23,9 @@ fn test_all<T: SerdeDic<()>>(file: &str) {
 
 fn main() {
     let mut args = env::args();
-    let _ = args.next().unwrap_or_else(|| panic!("実行ファイルが不明！？"));
-    let dictype: String = args.next().unwrap_or_else(|| panic!("タイプが指定されていません。"));
-    let file = args.next().unwrap_or_else(|| panic!("ファイルが指定されていません。"));
+    let _ = args.next().expect("実行ファイルが不明！？");
+    let dictype = args.next().expect("タイプが指定されていません。");
+    let file = args.next().expect("ファイルが指定されていません。");
 
     match dictype.as_str() {
         "array" => test_all::<DoubleArray<()>>(&file),
