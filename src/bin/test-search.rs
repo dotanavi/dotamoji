@@ -8,7 +8,7 @@ use serde::{Serialize, de::DeserializeOwned};
 use dotamoji::*;
 use dotamoji::util::load_from_file;
 
-fn search_test<T: PrefixTree<()> + Serialize + DeserializeOwned>(file: &str) {
+fn search_test<T: Dictionary<()> + Serialize + DeserializeOwned>(file: &str) {
     let pt: T = load_from_file(file);
     let mut cnt = 0;
     let stdin = io::stdin();

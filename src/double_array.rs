@@ -1,5 +1,5 @@
 use std::{char, u16, cmp::min, iter::once, fmt::Debug};
-use super::PrefixTree;
+use super::Dictionary;
 
 #[derive(Eq, PartialEq)]
 enum Index { Ok, Empty, Conflict, OutOfRange }
@@ -198,7 +198,7 @@ impl<T: Debug> DoubleArray<T> {
     }
 }
 
-impl<T> PrefixTree<T> for DoubleArray<T> {
+impl<T> Dictionary<T> for DoubleArray<T> {
     #[inline]
     fn new() -> Self { DoubleArray::new() }
     #[inline]

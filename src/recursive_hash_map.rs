@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use super::PrefixTree;
+use super::Dictionary;
 
 #[derive(Serialize, Deserialize)]
 pub struct RecursiveHashMap<T> {
@@ -8,7 +8,7 @@ pub struct RecursiveHashMap<T> {
     data: HashMap<u32, Vec<T>>,
 }
 
-impl<T> PrefixTree<T> for RecursiveHashMap<T> {
+impl<T> Dictionary<T> for RecursiveHashMap<T> {
     #[inline]
     fn new() -> Self {
         Self { id: 0, link: HashMap::new(), data: HashMap::new() }

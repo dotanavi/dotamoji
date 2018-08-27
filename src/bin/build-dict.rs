@@ -7,7 +7,7 @@ use serde::{Serialize, de::DeserializeOwned};
 
 use dotamoji::*;
 
-fn build<T: PrefixTree<()> + Serialize + DeserializeOwned>(file: &str) {
+fn build<T: Dictionary<()> + Serialize + DeserializeOwned>(file: &str) {
     let stdin = io::stdin();
     let mut dic = T::new();
     for line in stdin.lock().lines().filter_map(Result::ok) {

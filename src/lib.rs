@@ -9,7 +9,7 @@ mod recursive_hash_map;
 pub use double_array::DoubleArray;
 pub use recursive_hash_map::RecursiveHashMap;
 
-pub trait PrefixTree<T> {
+pub trait Dictionary<T> {
     fn new() -> Self;
     fn len(&self) -> usize;
     fn get(&self, key: &str) -> Option<&[T]>;
