@@ -1,4 +1,4 @@
-use std::{char, u16, cmp::{max, min}, iter::once, fmt::Debug};
+use std::{char, u16, cmp::{max, min}, fmt::Debug};
 use super::Dictionary;
 
 #[derive(Eq, PartialEq)]
@@ -114,21 +114,21 @@ impl<T> DoubleArray<T> {
 
     #[inline]
     fn put_first_one(&mut self, current_ix: usize, ch: u16) -> usize {
-        let new_base = self.find_new_base_one(ch);
-        self.base[current_ix] = new_base as u32;
-        return new_base as usize + ch as usize
+        let position = self.find_new_base_one(ch);
+        self.base[current_ix] = position as u32 - ch as u32;
+        return position;
     }
 
     #[inline]
     fn find_new_base_one(&mut self, ch: u16) -> usize {
         for i in ch as usize + 1 .. self.check.len() {
             if self.check[i] == 0 {
-                return i - ch as usize;
+                return i;
             }
         }
         let pos = max(self.check.len(), ch as usize + 1);
         self.extend(pos + 1);
-        return pos - ch as usize;
+        return pos;
     }
 
     fn rebase(&mut self, current_ix: usize, ch: u16) -> usize {
@@ -162,9 +162,10 @@ impl<T> DoubleArray<T> {
                 // 4. 旧遷移先ノードから更に遷移しているノードの check を新遷移先ノードの index で更新
                 let src_ix = src_ix as u32;
                 let dst_ix = dst_ix as u32;
-                for i in src_base .. min(self.check.len(), src_base + u16::MAX as usize) {
-                    if self.check[i] == src_ix {
-                        self.check[i] = dst_ix;
+                let range = src_base .. min(self.check.len(), src_base + u16::MAX as usize);
+                for mut c in &mut self.check[range] {
+                    if *c == src_ix {
+                        *c = dst_ix
                     }
                 }
             }
@@ -177,20 +178,27 @@ impl<T> DoubleArray<T> {
 
     fn find_new_base(&mut self, next_nodes: &[u16], ch: u16) -> usize {
         debug_assert!(next_nodes.len() > 0);
+
+        let ch = ch as usize;
         let mut new_base = 0;
         'out: loop {
             new_base += 1;
-            for ch in next_nodes.iter().chain(once(&ch)) {
+            let mut ix = new_base + ch;
+            while ix < self.check.len() && self.check[ix] != 0 {
+                ix += 1;
+            }
+            new_base = ix - ch as usize;
+
+            for ch in next_nodes {
                 let new_ix = new_base + *ch as usize;
-                if new_ix < self.check.len() {
-                    if self.check[new_ix] == 0 {
-                        // OK
-                    } else {
-                        continue 'out;
-                    }
-                } else {
-                    self.extend(new_ix + 1);
+                if new_ix < self.check.len() && self.check[new_ix] != 0 {
+                    continue 'out;
                 }
+            }
+            // next_nodes は昇順のため最後の要素が最大である。
+            let last_ix = max(ix, new_base + *next_nodes.last().unwrap() as usize);
+            if last_ix >= self.check.len() {
+                self.extend(last_ix + 1);
             }
             return new_base;
         }
