@@ -13,6 +13,15 @@ mod recursive_hash_map;
 pub use double_array::DoubleArray;
 pub use recursive_hash_map::RecursiveHashMap;
 
+#[derive(Serialize, Deserialize)]
+pub struct Info { left_id: u16, right_id: u16, cost: i16 }
+
+impl Info {
+    pub fn new(left_id: u16, right_id: u16, cost: i16) -> Self {
+        Info { left_id, right_id, cost }
+    }
+}
+
 pub trait Dictionary<T> {
     fn new() -> Self;
     fn len(&self) -> usize;

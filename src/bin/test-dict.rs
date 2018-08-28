@@ -5,7 +5,7 @@ use std::io::{self, BufRead};
 
 use dotamoji::*;
 
-fn test_all<T: SerdeDic<()>>(file: &str) {
+fn test_all<T: SerdeDic<Info>>(file: &str) {
     let dic = T::load_from_file(file);
 
     let stdin = io::stdin();
@@ -28,8 +28,8 @@ fn main() {
     let file = args.next().expect("ファイルが指定されていません。");
 
     match dictype.as_str() {
-        "array" => test_all::<DoubleArray<()>>(&file),
-        "hash" => test_all::<RecursiveHashMap<()>>(&file),
+        "array" => test_all::<DoubleArray<Info>>(&file),
+        "hash" => test_all::<RecursiveHashMap<Info>>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }

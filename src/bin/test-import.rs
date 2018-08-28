@@ -5,7 +5,7 @@ use std::env;
 
 use dotamoji::*;
 
-fn len<T: SerdeDic<()>>(file: &str) -> usize {
+fn len<T: SerdeDic<Info>>(file: &str) -> usize {
     T::load_from_file(&file).len()
 }
 
@@ -16,8 +16,8 @@ fn main() {
     let file = args.next().expect("ファイルが指定されていません。");
 
     let len = match dictype.as_str() {
-        "array" => len::<DoubleArray<()>>(&file),
-        "hash" => len::<RecursiveHashMap<()>>(&file),
+        "array" => len::<DoubleArray<Info>>(&file),
+        "hash" => len::<RecursiveHashMap<Info>>(&file),
         _ => panic!("不明なタイプです。"),
     };
     println!("len = {}", len);

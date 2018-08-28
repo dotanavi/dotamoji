@@ -1,16 +1,28 @@
 extern crate dotamoji;
 
+use std::str::FromStr;
 use std::env;
 use std::io::{self, BufRead};
 
 use dotamoji::*;
 
-fn build<T: SerdeDic<()>>(file: &str) {
+fn read_int<T: FromStr>(str: &str) -> T {
+    match str.parse() {
+        Ok(x) => x,
+        Err(_) => panic!("{:?}を数値に変換できません", str),
+    }
+}
+
+fn build<T: SerdeDic<Info>>(file: &str) {
     let stdin = io::stdin();
     let mut dic = T::new();
     for line in stdin.lock().lines().filter_map(Result::ok) {
-        let word = line.split(",").next().unwrap();
-        dic.insert(word, ());
+        let mut row = line.split(",");
+        let word = row.next().expect("文字が取得できません");
+        let left = read_int(row.next().expect("LeftIDが取得できません"));
+        let right = read_int(row.next().expect("RightIDが取得できません"));
+        let cost = read_int(row.next().expect("コストが取得できません"));
+        dic.insert(word, Info::new(left, right, cost));
     }
     dic.save_to_file(file);
     println!("{} を作成しました。", file);
@@ -23,8 +35,8 @@ fn main() {
     let file = args.next().expect("ファイルが指定されていません。");
 
     match dictype.as_str() {
-        "array" => build::<DoubleArray<()>>(&file),
-        "hash" => build::<RecursiveHashMap<()>>(&file),
+        "array" => build::<DoubleArray<Info>>(&file),
+        "hash" => build::<RecursiveHashMap<Info>>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }
