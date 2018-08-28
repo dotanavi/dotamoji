@@ -9,6 +9,7 @@ use serde::{Serialize, de::DeserializeOwned};
 
 mod double_array;
 mod recursive_hash_map;
+pub mod matrix;
 
 pub use double_array::DoubleArray;
 pub use recursive_hash_map::RecursiveHashMap;
