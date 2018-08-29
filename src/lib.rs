@@ -9,12 +9,15 @@ use serde::{Serialize, de::DeserializeOwned};
 
 mod double_array;
 mod recursive_hash_map;
-pub mod matrix;
+mod matrix;
+mod analyze;
 
 pub use double_array::DoubleArray;
 pub use recursive_hash_map::RecursiveHashMap;
+pub use matrix::Matrix;
+pub use analyze::analyze;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Copy, Clone, Serialize, Deserialize)]
 pub struct Info { left_id: u16, right_id: u16, cost: i16 }
 
 impl Info {
@@ -28,6 +31,7 @@ pub trait Dictionary<T> {
     fn len(&self) -> usize;
     fn get(&self, key: &str) -> Option<&[T]>;
     fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, f: F);
+    fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], f: F);
     fn insert(&mut self, key: &str, value: T);
 }
 

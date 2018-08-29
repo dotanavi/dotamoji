@@ -31,6 +31,7 @@ impl<T> Dictionary<T> for RecursiveHashMap<T> {
         }
     }
 
+    #[inline]
     fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, mut f: F) {
         let mut chars: Vec<u16> = vec![];
         let mut current_id = 0;
@@ -41,6 +42,22 @@ impl<T> Dictionary<T> for RecursiveHashMap<T> {
                     chars.push(ch);
                     if let Some(vec) = self.data.get(next_id) {
                         f(&chars, &vec[..]);
+                    }
+                    current_id = *next_id;
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], mut f: F) {
+        let mut current_id = 0;
+        for (ix, ch) in key.iter().enumerate() {
+            match self.link.get(&(current_id, *ch)) {
+                None => return,
+                Some(next_id) => {
+                    if let Some(vec) = self.data.get(next_id) {
+                        f(ix, &vec[..]);
                     }
                     current_id = *next_id;
                 }

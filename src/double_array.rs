@@ -41,6 +41,7 @@ impl<T> DoubleArray<T> {
         }
     }
 
+    #[inline]
     pub fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, mut f: F) {
         let mut chars: Vec<u16> = vec![];
         let mut current_ix = 1;
@@ -51,6 +52,21 @@ impl<T> DoubleArray<T> {
                 if let Some(v) = self.data.get(current_ix) {
                     if v.len() > 0 {
                         f(&chars, &v[..]);
+                    }
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], mut f: F) {
+        let mut current_ix = 1;
+        for (ix, ch) in key.iter().enumerate() {
+            if let (Index::Transit, next_ix) = self.next_index(current_ix, *ch) {
+                current_ix = next_ix;
+                if let Some(v) = self.data.get(current_ix) {
+                    if v.len() > 0 {
+                        f(ix, &v[..]);
                     }
                 }
             }
@@ -238,6 +254,8 @@ impl<T> Dictionary<T> for DoubleArray<T> {
     fn get(&self, key: &str) -> Option<&[T]> { self.get(key) }
     #[inline]
     fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, f: F) { self.each_prefix(key, f) }
+    #[inline]
+    fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], f: F) { self.each_prefix16(key, f) }
     #[inline]
     fn insert(&mut self, key: &str, value: T) { self.insert(key, value) }
 }
