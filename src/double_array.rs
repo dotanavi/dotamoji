@@ -54,6 +54,8 @@ impl<T> DoubleArray<T> {
                         f(&chars, &v[..]);
                     }
                 }
+            } else {
+                return;
             }
         }
     }
@@ -69,6 +71,8 @@ impl<T> DoubleArray<T> {
                         f(ix, &v[..]);
                     }
                 }
+            } else {
+                return;
             }
         }
     }
