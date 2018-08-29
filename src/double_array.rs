@@ -1,5 +1,5 @@
 use std::{char, u16, cmp::{max, min}, fmt::Debug};
-use super::Dictionary;
+use super::PrefixMap;
 
 #[derive(Eq, PartialEq)]
 enum Index { Zero, Transit, Empty, Conflict, OutOfRange }
@@ -249,7 +249,7 @@ impl<T: Debug> DoubleArray<T> {
     }
 }
 
-impl<T> Dictionary<T> for DoubleArray<T> {
+impl<T> PrefixMap<T> for DoubleArray<T> {
     #[inline]
     fn new() -> Self { DoubleArray::new() }
     #[inline]

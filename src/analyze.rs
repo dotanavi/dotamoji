@@ -24,7 +24,7 @@ fn find_min_cost(src_id: u16, nodes: &[Node], matrix: &Matrix) -> Option<(usize,
         .min_by_key(|pair| pair.1)
 }
 
-pub fn analyze<D: Dictionary<Info>>(dic: &D, matrix: &Matrix, sentence: &str) {
+pub fn analyze<D: PrefixMap<Info>>(dic: &D, matrix: &Matrix, sentence: &str) {
     let sentence: Vec<u16> = sentence.encode_utf16().collect();
 
     let mut nodes = vec![vec![Node::new(0, 0, 0, 0)]];

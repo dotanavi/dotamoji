@@ -13,9 +13,9 @@ fn read_int<T: FromStr>(str: &str) -> T {
     }
 }
 
-fn build<T: SerdeDic<Info>>(file: &str) {
+fn build<D: Dictionary>(file: &str) {
     let stdin = io::stdin();
-    let mut dic = T::new();
+    let mut dic = D::new();
     for line in stdin.lock().lines().filter_map(Result::ok) {
         let mut row = line.split(",");
         let word = row.next().expect("文字が取得できません");
@@ -35,8 +35,8 @@ fn main() {
     let file = args.next().expect("ファイルが指定されていません。");
 
     match dictype.as_str() {
-        "array" => build::<DoubleArray<Info>>(&file),
-        "hash" => build::<RecursiveHashMap<Info>>(&file),
+        "array" => build::<DoubleArrayDict>(&file),
+        "hash" => build::<RecHashDict>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }

@@ -5,8 +5,8 @@ use std::io::{self, BufRead};
 
 use dotamoji::*;
 
-fn search_test<T: SerdeDic<Info>>(file: &str) {
-    let pt = T::load_from_file(file);
+fn search_test<D: Dictionary>(file: &str) {
+    let pt = D::load_from_file(file);
     let mut cnt = 0;
     let stdin = io::stdin();
     for line in stdin.lock().lines().filter_map(Result::ok) {
@@ -23,8 +23,8 @@ fn main() {
     let file = args.next().expect("ファイルが指定されていません。");
 
     match dictype.as_str() {
-        "array" => search_test::<DoubleArray<Info>>(&file),
-        "hash" => search_test::<RecursiveHashMap<Info>>(&file),
+        "array" => search_test::<DoubleArrayDict>(&file),
+        "hash" => search_test::<RecHashDict>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }

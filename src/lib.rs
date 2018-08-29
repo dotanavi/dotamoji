@@ -26,7 +26,7 @@ impl Info {
     }
 }
 
-pub trait Dictionary<T> {
+pub trait PrefixMap<T> {
     fn new() -> Self;
     fn len(&self) -> usize;
     fn get(&self, key: &str) -> Option<&[T]>;
@@ -35,7 +35,7 @@ pub trait Dictionary<T> {
     fn insert(&mut self, key: &str, value: T);
 }
 
-pub trait SerdeDic<T>: Dictionary<T> + Serialize + DeserializeOwned {
+pub trait Dictionary: PrefixMap<Info> + Serialize + DeserializeOwned {
     fn load_from_file(file: &str) -> Self {
         let file = File::open(file).expect("ファイルが開けません");
         let file = BufReader::new(file);
@@ -48,8 +48,10 @@ pub trait SerdeDic<T>: Dictionary<T> + Serialize + DeserializeOwned {
         bincode::serialize_into(file, self).expect("保存に失敗しました。");
     }
 }
+impl <D> Dictionary for D where D: PrefixMap<Info> + Serialize + DeserializeOwned {}
 
-impl<T, D> SerdeDic<T> for D where D: Dictionary<T> + Serialize + DeserializeOwned {}
+pub type DoubleArrayDict = DoubleArray<Info>;
+pub type RecHashDict = RecursiveHashMap<Info>;
 
 pub mod util {
     pub fn decode_utf16(chars: &[u16]) -> String {
