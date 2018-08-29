@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use super::PrefixMap;
+use super::{PrefixMap, AsUtf16};
 
 #[derive(Serialize, Deserialize)]
 pub struct RecursiveHashMap<T> {
@@ -17,9 +17,9 @@ impl<T> PrefixMap<T> for RecursiveHashMap<T> {
     #[inline]
     fn len(&self) -> usize { self.data.len() }
 
-    fn get(&self, key: &str) -> Option<&[T]> {
+    fn get(&self, key: impl AsUtf16) -> Option<&[T]> {
         let mut current_id = 0;
-        for ch in key.encode_utf16() {
+        for ch in key.as_utf16() {
             match self.link.get(&(current_id, ch)) {
                 Some(next_id) => current_id = *next_id,
                 None => return None,
@@ -65,13 +65,13 @@ impl<T> PrefixMap<T> for RecursiveHashMap<T> {
         }
     }
 
-    fn insert(&mut self, key: &str, value: T) {
+    fn insert(&mut self, key: impl AsUtf16, value: T) {
         let id = &mut self.id;
         let link = &mut self.link;
         let data = &mut self.data;
 
         let mut current_id = 0;
-        for ch in key.encode_utf16() {
+        for ch in key.as_utf16() {
             let entry = link.entry((current_id, ch));
             let next_id = entry.or_insert_with(|| { *id += 1; *id });
             current_id = *next_id;

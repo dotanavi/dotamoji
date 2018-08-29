@@ -29,10 +29,33 @@ impl Info {
 pub trait PrefixMap<T> {
     fn new() -> Self;
     fn len(&self) -> usize;
-    fn get(&self, key: &str) -> Option<&[T]>;
+    fn get(&self, key: impl AsUtf16) -> Option<&[T]>;
     fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, f: F);
     fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], f: F);
-    fn insert(&mut self, key: &str, value: T);
+    fn insert(&mut self, key: impl AsUtf16, value: T);
+}
+
+pub trait AsUtf16 {
+    type I: Iterator<Item = u16>;
+    fn as_utf16(&self) -> Self::I;
+}
+
+use std::slice::Iter;
+use std::iter::Cloned;
+use std::str::EncodeUtf16;
+
+impl <'a> AsUtf16 for &'a [u16] {
+    type I = Cloned<Iter<'a, u16>>;
+
+    #[inline]
+    fn as_utf16(&self) -> Self::I { self.iter().cloned() }
+}
+
+impl <'a> AsUtf16 for &'a str {
+    type I = EncodeUtf16<'a>;
+
+    #[inline]
+    fn as_utf16(&self) -> Self::I { self.encode_utf16() }
 }
 
 pub trait Dictionary: PrefixMap<Info> + Serialize + DeserializeOwned {

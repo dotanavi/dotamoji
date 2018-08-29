@@ -1,5 +1,5 @@
 use std::{char, u16, cmp::{max, min}, fmt::Debug};
-use super::PrefixMap;
+use super::{PrefixMap, AsUtf16};
 
 #[derive(Eq, PartialEq)]
 enum Index { Zero, Transit, Empty, Conflict, OutOfRange }
@@ -24,9 +24,9 @@ impl<T> DoubleArray<T> {
     #[inline]
     pub fn len(&self) -> usize { self.base.len() }
 
-    pub fn get(&self, key: &str) -> Option<&[T]> {
+    pub fn get(&self, key: impl AsUtf16) -> Option<&[T]> {
         let mut current_ix = 1;
-        for ch in key.encode_utf16() {
+        for ch in key.as_utf16() {
             if let (Index::Transit, next_ix) = self.next_index(current_ix, ch) {
                 current_ix = next_ix;
             } else {
@@ -98,9 +98,9 @@ impl<T> DoubleArray<T> {
         }
     }
 
-    pub fn insert(&mut self, key: &str, value: T) {
+    pub fn insert(&mut self, key: impl AsUtf16, value: T) {
         let mut current_ix = 1;
-        for ch in key.encode_utf16() {
+        for ch in key.as_utf16() {
             let (state, next_ix) = self.next_index(current_ix, ch);
             current_ix = match state {
                 Index::Transit => next_ix,
@@ -255,13 +255,13 @@ impl<T> PrefixMap<T> for DoubleArray<T> {
     #[inline]
     fn len(&self) -> usize { self.len() }
     #[inline]
-    fn get(&self, key: &str) -> Option<&[T]> { self.get(key) }
+    fn get(&self, key: impl AsUtf16) -> Option<&[T]> { self.get(key) }
     #[inline]
     fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, f: F) { self.each_prefix(key, f) }
     #[inline]
     fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], f: F) { self.each_prefix16(key, f) }
     #[inline]
-    fn insert(&mut self, key: &str, value: T) { self.insert(key, value) }
+    fn insert(&mut self, key: impl AsUtf16, value: T) { self.insert(key, value) }
 }
 
 #[cfg(test)]

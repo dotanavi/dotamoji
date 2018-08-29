@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::str::FromStr;
 
+#[inline]
 fn read_int<T: FromStr>(str: &str) -> T {
     match str.trim().parse() {
         Ok(x) => x,
