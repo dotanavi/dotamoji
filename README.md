@@ -23,7 +23,6 @@ cargo build --release
 ### 辞書の構築
 
 入力ファイルをダブル配列にして、出力ファイルに保存します。
-現在単語の登録のみを行っており、ここからコストなどを取り出すことはできません。
 
 ```
 ./target/release/build-dict array [出力ファイル] < [辞書テキスト]
@@ -43,3 +42,10 @@ cargo build --release
 ./target/release/test-dict array [出力された辞書ファイル] < [辞書テキスト]
 ```
 
+### 形態素解析
+
+標準入力を形態素解析します。
+
+```
+echo "すもももももももものうち" | ./target/release/analyze array [出力された辞書ファイル] [連結コストファイル]
+```
