@@ -1,16 +1,9 @@
-// use std::cell::{RefCell};
 use super::{PrefixMap, AsUtf16};
 
 #[derive(Serialize, Deserialize)]
-struct Assoc<T> {
-    key: u16,
-    value: Box<Node<T>>,
-}
-
-#[derive(Serialize, Deserialize)]
-struct Node<T> {
-    children: Vec<Assoc<T>>,
-    data: Vec<T>,
+pub struct Node<T> {
+    pub children: Vec<(u16, Node<T>)>,
+    pub data: Vec<T>,
 }
 
 impl <T> Node<T> {
@@ -19,17 +12,15 @@ impl <T> Node<T> {
 
     fn count_data(&self) -> usize {
         let child_count: usize = self.children.iter()
-            .map(|assoc| assoc.value.count_data())
+            .map(|(_, n)| n.count_data())
             .sum();
         child_count + self.data.len()
     }
 
     fn dig_get(&self, mut iter: impl Iterator<Item = u16>) -> Option<&[T]> {
         if let Some(ch) = iter.next() {
-            for assoc in self.children.iter() {
-                if assoc.key == ch {
-                    return assoc.value.dig_get(iter);
-                }
+            if let Ok(index) = self.children.binary_search_by_key(&ch, |&(c, _)| c) {
+                return self.children[index].1.dig_get(iter);
             }
             None
         } else {
@@ -43,14 +34,14 @@ impl <T> Node<T> {
 
     fn dig_set(&mut self, mut iter: impl Iterator<Item = u16>, data: T) {
         if let Some(ch) = iter.next() {
-            for assoc in self.children.iter_mut() {
-                if assoc.key == ch {
-                    return assoc.value.dig_set(iter, data);
+            match self.children.binary_search_by_key(&ch, |&(c, _)| c) {
+                Ok(index) => self.children[index].1.dig_set(iter, data),
+                Err(index) => {
+                    let mut node = Node::new();
+                    node.dig_set(iter, data);
+                    self.children.insert(index, (ch, node));
                 }
             }
-            let mut node = Node::new();
-            node.dig_set(iter, data);
-            self.children.push(Assoc { key: ch, value: Box::new(node) });
         } else {
             self.data.push(data);
         }
@@ -61,10 +52,8 @@ impl <T> Node<T> {
             f(depth, &self.data);
         }
         if let Some(ch) = iter.next() {
-            for assoc in self.children.iter() {
-                if assoc.key == ch {
-                    return assoc.value.dig_yield(depth + 1, iter, f);
-                }
+            if let Ok(index) = self.children.binary_search_by_key(&ch, |&(c, _)| c) {
+                return self.children[index].1.dig_yield(depth + 1, iter, f);
             }
         }
     }
@@ -72,7 +61,7 @@ impl <T> Node<T> {
 
 #[derive(Serialize, Deserialize)]
 pub struct Trie<T>{
-    root: Node<T>,
+    pub(crate) root: Node<T>,
 }
 
 impl <T> PrefixMap<T> for Trie<T> {
