@@ -28,7 +28,7 @@ impl Info {
 
 pub trait PrefixMap<T> {
     fn new() -> Self;
-    fn len(&self) -> usize;
+    fn count(&self) -> usize;
     fn get(&self, key: impl AsUtf16) -> Option<&[T]>;
     fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, f: F);
     fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], f: F);

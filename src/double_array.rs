@@ -22,7 +22,9 @@ impl<T> DoubleArray<T> {
     }
 
     #[inline]
-    pub fn len(&self) -> usize { self.base.len() }
+    pub fn count(&self) -> usize {
+        self.data.iter().map(|v| v.len()).sum()
+    }
 
     pub fn get(&self, key: impl AsUtf16) -> Option<&[T]> {
         let mut current_ix = 1;
@@ -253,7 +255,7 @@ impl<T> PrefixMap<T> for DoubleArray<T> {
     #[inline]
     fn new() -> Self { DoubleArray::new() }
     #[inline]
-    fn len(&self) -> usize { self.len() }
+    fn count(&self) -> usize { self.count() }
     #[inline]
     fn get(&self, key: impl AsUtf16) -> Option<&[T]> { self.get(key) }
     #[inline]

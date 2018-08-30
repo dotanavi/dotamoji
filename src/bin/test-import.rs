@@ -5,8 +5,8 @@ use std::env;
 
 use dotamoji::*;
 
-fn len<D: Dictionary>(file: &str) -> usize {
-    D::load_from_file(&file).len()
+fn count<D: Dictionary>(file: &str) -> usize {
+    D::load_from_file(&file).count()
 }
 
 fn main() {
@@ -15,10 +15,10 @@ fn main() {
     let dictype = args.next().expect("タイプが指定されていません。");
     let file = args.next().expect("ファイルが指定されていません。");
 
-    let len = match dictype.as_str() {
-        "array" => len::<DoubleArrayDict>(&file),
-        "hash" => len::<RecHashDict>(&file),
+    let count = match dictype.as_str() {
+        "array" => count::<DoubleArrayDict>(&file),
+        "hash" => count::<RecHashDict>(&file),
         _ => panic!("不明なタイプです。"),
     };
-    println!("len = {}", len);
+    println!("count = {}", count);
 }

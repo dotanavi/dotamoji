@@ -15,7 +15,9 @@ impl<T> PrefixMap<T> for RecursiveHashMap<T> {
     }
 
     #[inline]
-    fn len(&self) -> usize { self.data.len() }
+    fn count(&self) -> usize {
+        self.data.values().map(|v| v.len()).sum()
+    }
 
     fn get(&self, key: impl AsUtf16) -> Option<&[T]> {
         let mut current_id = 0;
