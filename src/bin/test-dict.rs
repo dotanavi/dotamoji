@@ -30,6 +30,7 @@ fn main() {
     match dictype.as_str() {
         "array" => test_all::<DoubleArrayDict>(&file),
         "hash" => test_all::<RecHashDict>(&file),
+        "trie" => test_all::<TrieDict>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }

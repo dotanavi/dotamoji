@@ -18,6 +18,7 @@ fn main() {
     let count = match dictype.as_str() {
         "array" => count::<DoubleArrayDict>(&file),
         "hash" => count::<RecHashDict>(&file),
+        "trie" => count::<TrieDict>(&file),
         _ => panic!("不明なタイプです。"),
     };
     println!("count = {}", count);

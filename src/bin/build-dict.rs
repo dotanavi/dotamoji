@@ -37,6 +37,7 @@ fn main() {
     match dictype.as_str() {
         "array" => build::<DoubleArrayDict>(&file),
         "hash" => build::<RecHashDict>(&file),
+        "trie" => build::<TrieDict>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }

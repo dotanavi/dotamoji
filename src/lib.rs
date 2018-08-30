@@ -9,11 +9,13 @@ use serde::{Serialize, de::DeserializeOwned};
 
 mod double_array;
 mod recursive_hash_map;
+mod trie;
 mod matrix;
 mod analyze;
 
 pub use double_array::DoubleArray;
 pub use recursive_hash_map::RecursiveHashMap;
+pub use trie::Trie;
 pub use matrix::Matrix;
 pub use analyze::analyze;
 
@@ -75,6 +77,7 @@ impl <D> Dictionary for D where D: PrefixMap<Info> + Serialize + DeserializeOwne
 
 pub type DoubleArrayDict = DoubleArray<Info>;
 pub type RecHashDict = RecursiveHashMap<Info>;
+pub type TrieDict = Trie<Info>;
 
 pub mod util {
     pub fn decode_utf16(chars: &[u16]) -> String {

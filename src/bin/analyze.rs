@@ -26,7 +26,7 @@ fn main() {
     match dictype.as_str() {
         "array" => analyze::<DoubleArrayDict>(&dic_file, &mat_file),
         "hash" => analyze::<RecHashDict>(&dic_file, &mat_file),
+        "trie" => analyze::<TrieDict>(&dic_file, &mat_file),
         _ => panic!("不明なタイプです。"),
     }
-
 }
