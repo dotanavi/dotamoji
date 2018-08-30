@@ -10,12 +10,12 @@ fn test_all<D: Dictionary>(file: &str) {
 
     let stdin = io::stdin();
     let mut cnt = 0;
-    for line in stdin.lock().lines().filter_map(Result::ok) {
+    for (ix, line) in stdin.lock().lines().filter_map(Result::ok).enumerate() {
         let word = line.split(",").next().unwrap();
         if let Some(_) = dic.get(word) {
             cnt += 1;
         } else {
-            panic!("{} が見つかりません。", word);
+            panic!("{} が見つかりません。({}行目)", word, ix + 1);
         }
     }
     println!("{} 件のデータすべてが存在しました。", cnt);

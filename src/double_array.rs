@@ -22,6 +22,11 @@ impl<T> DoubleArray<T> {
     }
 
     #[inline]
+    pub fn from_raw_parts(base: Vec<u32>, check: Vec<u32>, data: Vec<Vec<T>>) -> Self {
+        Self { base, check, data }
+    }
+
+    #[inline]
     pub fn count(&self) -> usize {
         self.data.iter().map(|v| v.len()).sum()
     }

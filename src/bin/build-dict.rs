@@ -38,6 +38,7 @@ fn main() {
         "array" => build::<DoubleArrayDict>(&file),
         "hash" => build::<RecHashDict>(&file),
         "trie" => build::<TrieDict>(&file),
+        "trans" => build::<TransDict>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }
