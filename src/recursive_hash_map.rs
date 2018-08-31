@@ -175,8 +175,6 @@ mod tests {
     #[test]
     // "前方一致検索。"
     fn test_prefix() {
-        use super::super::util::decode_utf16;
-
         let mut pt = RecursiveHashMap::new();
         pt.insert("abc", 1);
         pt.insert("ad", 2);
@@ -186,7 +184,7 @@ mod tests {
 
         let mut vec = vec![];
         pt.each_prefix("abcd", |chars, data| {
-            vec.push((decode_utf16(chars), data.to_owned()));
+            vec.push((String::from_utf16_lossy(chars), data.to_owned()));
         });
         assert_eq!(vec, vec![
             ("a".to_string(), vec![4, 5]),

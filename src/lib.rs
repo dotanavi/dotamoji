@@ -11,6 +11,7 @@ mod matrix;
 mod recursive_hash_map;
 mod trie;
 mod transform;
+mod search_cache;
 
 pub use analyze::analyze;
 pub use as_utf16::AsUtf16;
@@ -25,13 +26,3 @@ pub type DoubleArrayDict = DoubleArray<Info>;
 pub type RecHashDict = RecursiveHashMap<Info>;
 pub type TransDict = Trans<Info>;
 pub type TrieDict = Trie<Info>;
-
-pub mod util {
-    pub fn decode_utf16(chars: &[u16]) -> String {
-        use std::char;
-
-        char::decode_utf16(chars.iter().cloned())
-            .filter_map(Result::ok)
-            .collect()
-    }
-}

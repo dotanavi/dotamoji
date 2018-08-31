@@ -1,7 +1,6 @@
 use std::i32;
 
 use super::*;
-use super::util::decode_utf16;
 
 struct Node {
     id: u16,
@@ -60,6 +59,6 @@ pub fn analyze<D: PrefixMap<Info>>(dic: &D, matrix: &Matrix, sentence: &str) {
 
 fn debug_print(sentence: &[u16], start_ix: usize, node: &Node) {
     let slice = &sentence[start_ix .. start_ix + node.len as usize];
-    let word = decode_utf16(slice);
+    let word = String::from_utf16_lossy(slice);
     println!("id:{:>5} | cost:{:>6} | {}", node.id, node.cost, word);
 }

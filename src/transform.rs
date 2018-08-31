@@ -8,6 +8,8 @@ use super::AsUtf16;
 use dictionary::{PrefixMap, Dictionary, Info};
 use double_array::DoubleArray;
 use trie::{Node, Trie};
+use search_cache::SearchCache;
+use search_cache::bit_cache::BitCache;
 
 pub enum Trans<T> {
     Array(Box<DoubleArray<T>>),
@@ -85,7 +87,11 @@ pub fn transform<T>(trie: Trie<T>) -> DoubleArray<T> {
     let mut check = vec![0, 0];
     let mut data = vec![vec![], vec![]];
 
-    put_rec(trie.root, 1, &mut base, &mut check, &mut data);
+    // let mut cache = NoCache::new(2);
+    // let mut cache = BoolCache::new(2);
+    let mut cache = BitCache::new(2);
+
+    put_rec(trie.root, 1, &mut base, &mut check, &mut data, &mut cache);
     let da = DoubleArray::from_raw_parts(base, check, data);
 
     // let after_count = da.count();
@@ -95,40 +101,14 @@ pub fn transform<T>(trie: Trie<T>) -> DoubleArray<T> {
     return da;
 }
 
-#[inline]
-fn find_base_one(ch: usize, search_start: usize, check: &[u32]) -> usize {
-    let mut ix = ch + search_start + 1;
-    while ix < check.len() && check[ix] != 0 {
-        ix += 1;
-    }
-    return ix - ch;
-}
-
-#[inline]
-fn find_base<T>(check: &[u32], children: &[(u16, T)]) -> usize {
-    let ch = children[0].0 as usize;
-
-    let mut index = 0;
-    'outer: loop {
-        index = find_base_one(ch, index, check);
-        for &(ch, _) in &children[1..] {
-            let ix = index + ch as usize;
-            if ix < check.len() && check[ix] != 0 {
-                continue 'outer;
-            }
-        }
-        return index;
-    }
-}
-
-#[inline]
-fn extend<T: Default>(vec: &mut Vec<T>, new_size: usize) {
-    let len = vec.len();
-    debug_assert!(len < new_size);
-    vec.extend((len .. new_size).map(|_| Default::default()));
-}
-
-fn put_rec<T>(mut node: Node<T>, base_index: usize, base: &mut Vec<u32>, check: &mut Vec<u32>, data: &mut Vec<Vec<T>>) {
+fn put_rec<T, C: SearchCache>(
+    mut node: Node<T>,
+    base_index: usize,
+    base: &mut Vec<u32>,
+    check: &mut Vec<u32>,
+    data: &mut Vec<Vec<T>>,
+    cache: &mut C,
+) {
     if node.data.len() > 0 {
         swap(&mut node.data, &mut data[base_index]);
     }
@@ -136,20 +116,24 @@ fn put_rec<T>(mut node: Node<T>, base_index: usize, base: &mut Vec<u32>, check: 
         return;
     }
 
-    let new_base = find_base(&check[..], &node.children);
+    let new_base = cache.find_base(&check[..], &node.children);
     base[base_index] = new_base as u32;
 
     let requred_size = new_base + node.children.last().expect("childは存在する").0 as usize + 1;
     if requred_size > base.len() {
-        extend(base, requred_size);
-        extend(check, requred_size);
-        extend(data, requred_size);
+        base.resize(requred_size, 0);
+        check.resize(requred_size, 0);
+        let n = data.len();
+        data.extend((n .. requred_size).map(|_| vec![]));
+        cache.extend(requred_size);
     }
     for &(ch, _) in &node.children {
-        check[new_base + ch as usize] = base_index as u32;
+        let index = new_base + ch as usize;
+        cache.mark(index);
+        check[index] = base_index as u32;
     }
     for (ch, child_node) in node.children {
-        put_rec(child_node, new_base + ch as usize, base, check, data);
+        put_rec(child_node, new_base + ch as usize, base, check, data, cache);
     }
 }
 
