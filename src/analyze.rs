@@ -26,6 +26,25 @@ fn find_min_cost(src_id: u16, nodes: &[Node], matrix: &Matrix) -> Option<(usize,
 pub fn analyze<D: PrefixMap<Info>>(dic: &D, matrix: &Matrix, sentence: &str) {
     let sentence: Vec<u16> = sentence.encode_utf16().collect();
 
+    if let Ok(nodes) = analyze_inner(dic, matrix, &sentence) {
+        let node_len = nodes.len();
+        let last_node = &nodes[node_len - 1][0];
+        println!("cost = {}", last_node.cost);
+        let mut x = last_node.next as usize;
+        let mut y = 0;
+        loop {
+            let node = &nodes[node_len - y - 2][x];
+            if node.len == 0 { break; }
+            debug_print(&sentence, y, &node);
+            x = node.next as usize;
+            y += node.len as usize;
+        }
+    } else {
+        println!("形態素解析に失敗しました。");
+    }
+}
+
+fn analyze_inner<D: PrefixMap<Info>>(dic: &D, matrix: &Matrix, sentence: &[u16]) -> Result<Vec<Vec<Node>>, ()> {
     let mut nodes = vec![vec![Node::new(0, 0, 0, 0)]];
     for ix in (0..sentence.len()).rev() {
         debug_assert!(nodes.len() == sentence.len() - ix);
@@ -42,21 +61,14 @@ pub fn analyze<D: PrefixMap<Info>>(dic: &D, matrix: &Matrix, sentence: &str) {
         nodes.push(column);
     }
     if let Some((index, min_cost)) = find_min_cost(0, nodes.last().unwrap(), matrix) {
-        println!("cost = {}", min_cost);
-        let mut x = index;
-        let mut y = 0;
-        while y < nodes.len() {
-            let node = &nodes[nodes.len() - y - 1][x];
-            if node.len == 0 { break; }
-            debug_print(&sentence, y, &node);
-            x = node.next as usize;
-            y += node.len as usize;
-        }
+        nodes.push(vec![Node::new(0, min_cost, 0, index as u8)]);
+        return Ok(nodes);
     } else {
-        panic!("形態素解析に失敗しました。");
+        return Err(());
     }
 }
 
+#[inline]
 fn debug_print(sentence: &[u16], start_ix: usize, node: &Node) {
     let slice = &sentence[start_ix .. start_ix + node.len as usize];
     let word = String::from_utf16_lossy(slice);

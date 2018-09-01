@@ -12,6 +12,7 @@ fn analyze<D: Dictionary>(dic_file: &str, mat_file: &str) {
     let stdin = io::stdin();
     for line in stdin.lock().lines().filter_map(Result::ok) {
         dotamoji::analyze(&dic, &mat, line.trim());
+        println!();
     }
 }
 
