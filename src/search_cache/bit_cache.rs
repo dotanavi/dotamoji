@@ -3,14 +3,17 @@ use std::mem::size_of;
 use super::SearchCache;
 
 type Bits = usize;
+
 const NUM_BITS: usize = 8 * size_of::<Bits>();
+
+#[inline]
+fn round_up(value: usize) -> usize {
+    (value + NUM_BITS) / NUM_BITS
+}
 
 pub struct BitCache(Vec<Bits>);
 
 impl BitCache {
-
-    #[inline]
-    fn round_up(value: usize) -> usize { (value + NUM_BITS) / NUM_BITS }
 
     #[inline]
     fn is_filled(&self, index: usize) -> bool {
@@ -50,11 +53,12 @@ impl BitCache {
 }
 
 impl SearchCache for BitCache {
-    #[inline]
-    fn new(size: usize) -> Self { BitCache(vec![0; BitCache::round_up(size)]) }
 
     #[inline]
-    fn extend(&mut self, size: usize) { self.0.resize(BitCache::round_up(size), 0); }
+    fn new(size: usize) -> Self { BitCache(vec![0; round_up(size)]) }
+
+    #[inline]
+    fn extend(&mut self, size: usize) { self.0.resize(round_up(size), 0); }
 
     #[inline]
     fn mark(&mut self, index: usize) {
