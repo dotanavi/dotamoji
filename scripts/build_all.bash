@@ -31,4 +31,4 @@ mkdir -p "$save_dir"
 build trans array
 build trie
 build hash
-build array
+# build array

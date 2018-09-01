@@ -2,6 +2,7 @@
 extern crate serde_derive;
 extern crate serde;
 extern crate bincode;
+extern crate fnv;
 
 mod analyze;
 mod as_utf16;

@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+use fnv::{FnvHashMap as HashMap};
+// use std::collections::HashMap;
 use super::{PrefixMap, AsUtf16};
 
 #[derive(Serialize, Deserialize)]
@@ -11,7 +12,7 @@ pub struct RecursiveHashMap<T> {
 impl<T> PrefixMap<T> for RecursiveHashMap<T> {
     #[inline]
     fn new() -> Self {
-        Self { id: 0, link: HashMap::new(), data: HashMap::new() }
+        Self { id: 0, link: Default::default(), data: Default::default() }
     }
 
     #[inline]
