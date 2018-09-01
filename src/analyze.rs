@@ -53,7 +53,6 @@ fn analyze_inner<D: PrefixMap<Info>>(dic: &D, matrix: &Matrix, sentence: &[u16])
         debug_assert!(nodes.len() == sentence.len() - ix);
         let mut column = vec![];
         dic.each_prefix16(&sentence[ix..], |len, info_list| {
-            let len = len + 1; // 一旦こっちで辻褄をあわせる。
             let search_nodes = &nodes[nodes.len() - len];
             for info in info_list {
                 if let Some((index, min_cost)) = find_min_cost(info.right_id, search_nodes, matrix) {

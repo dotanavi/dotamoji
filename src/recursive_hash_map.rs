@@ -59,7 +59,7 @@ impl<T> PrefixMap<T> for RecursiveHashMap<T> {
                 None => return,
                 Some(next_id) => {
                     if let Some(vec) = self.data.get(next_id) {
-                        f(ix, &vec[..]);
+                        f(ix + 1, &vec[..]);
                     }
                     current_id = *next_id;
                 }

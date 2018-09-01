@@ -75,7 +75,7 @@ impl<T> DoubleArray<T> {
                 current_ix = next_ix;
                 if let Some(v) = self.data.get(current_ix) {
                     if v.len() > 0 {
-                        f(ix, &v[..]);
+                        f(ix + 1, &v[..]);
                     }
                 }
             } else {
