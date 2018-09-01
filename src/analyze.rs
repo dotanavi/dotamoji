@@ -1,4 +1,5 @@
 use std::i32;
+use std::time::Instant;
 
 use super::*;
 
@@ -24,11 +25,13 @@ fn find_min_cost(src_id: u16, nodes: &[Node], matrix: &Matrix) -> Option<(usize,
 }
 
 pub fn analyze<D: PrefixMap<Info>>(dic: &D, matrix: &Matrix, sentence: &str) {
+    let start = Instant::now();
     let sentence: Vec<u16> = sentence.encode_utf16().collect();
 
     if let Ok(nodes) = analyze_inner(dic, matrix, &sentence) {
         let node_len = nodes.len();
         let last_node = &nodes[node_len - 1][0];
+        eprintln!("analyze: {:?}", start.elapsed());
         println!("cost = {}", last_node.cost);
         let mut x = last_node.next as usize;
         let mut y = 0;

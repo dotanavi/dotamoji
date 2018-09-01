@@ -1,13 +1,19 @@
 extern crate dotamoji;
 
+use std::time::Instant;
 use std::env;
 use std::io::{self, BufRead};
 
 use dotamoji::*;
 
 fn analyze<D: Dictionary>(dic_file: &str, mat_file: &str) {
+    let start = Instant::now();
     let dic = D::load_from_file(dic_file);
+    eprintln!("load_dic: {:?}", start.elapsed());
+
+    let start = Instant::now();
     let mat = Matrix::load_from_file(mat_file);
+    eprintln!("load_mat: {:?}", start.elapsed());
 
     let stdin = io::stdin();
     for line in stdin.lock().lines().filter_map(Result::ok) {
