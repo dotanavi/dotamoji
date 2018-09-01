@@ -26,4 +26,5 @@ pub use transform::Trans;
 pub type DoubleArrayDict = DoubleArray<Info>;
 pub type RecHashDict = RecursiveHashMap<Info>;
 pub type TransDict = Trans<Info>;
-pub type TrieDict = Trie<Info>;
+pub type TrieDictA = Trie<trie::NodeA<Info>>;
+pub type TrieDictB = Trie<trie::NodeB<Info>>;

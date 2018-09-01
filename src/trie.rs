@@ -1,31 +1,30 @@
 use super::{PrefixMap, AsUtf16};
 
-#[derive(Serialize, Deserialize)]
-pub struct Node<T> {
-    pub children: Vec<(u16, Node<T>)>,
-    pub data: Vec<T>,
-}
+pub trait Node<T> {
+    fn new() -> Self;
 
-impl <T> Node<T> {
-    #[inline]
-    fn new() -> Self { Node { children: vec![], data: vec![] } }
+    fn search(&self, ch: u16) -> Result<usize, usize>;
 
-    fn count_data(&self) -> usize {
-        let child_count: usize = self.children.iter()
-            .map(|(_, n)| n.count_data())
-            .sum();
-        child_count + self.data.len()
-    }
+    fn next_node(&self, index: usize) -> &Self;
+
+    fn search_or_create(&mut self, ch: u16) -> &mut Self;
+
+    fn count_data(&self) -> usize;
+
+    fn get_data(&self) -> &[T];
+
+    fn push_data(&mut self, data: T);
 
     fn dig_get(&self, mut iter: impl Iterator<Item = u16>) -> Option<&[T]> {
         if let Some(ch) = iter.next() {
-            if let Ok(index) = self.children.binary_search_by_key(&ch, |&(c, _)| c) {
-                return self.children[index].1.dig_get(iter);
+            if let Ok(index) = self.search(ch) {
+                return self.next_node(index).dig_get(iter);
             }
             None
         } else {
-            if self.data.len() > 0 {
-                Some(&self.data)
+            let data = self.get_data();
+            if data.len() > 0 {
+                Some(data)
             } else {
                 None
             }
@@ -34,37 +33,133 @@ impl <T> Node<T> {
 
     fn dig_set(&mut self, mut iter: impl Iterator<Item = u16>, data: T) {
         if let Some(ch) = iter.next() {
-            match self.children.binary_search_by_key(&ch, |&(c, _)| c) {
-                Ok(index) => self.children[index].1.dig_set(iter, data),
-                Err(index) => {
-                    let mut node = Node::new();
-                    node.dig_set(iter, data);
-                    self.children.insert(index, (ch, node));
-                }
-            }
+            self.search_or_create(ch).dig_set(iter, data);
         } else {
-            self.data.push(data);
+            self.push_data(data);
         }
     }
 
     fn dig_yield<I: Iterator<Item = u16>, F: FnMut(usize, &[T])>(&self, depth: usize, mut iter: I, mut f: F) {
-        if self.data.len() > 0 {
-            f(depth, &self.data);
+        let data = self.get_data();
+        if data.len() > 0 {
+            f(depth, data);
         }
         if let Some(ch) = iter.next() {
-            if let Ok(index) = self.children.binary_search_by_key(&ch, |&(c, _)| c) {
-                return self.children[index].1.dig_yield(depth + 1, iter, f);
+            if let Ok(index) = self.search(ch) {
+                return self.next_node(index).dig_yield(depth + 1, iter, f);
             }
         }
     }
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Trie<T>{
-    pub(crate) root: Node<T>,
+pub struct NodeA<T> {
+    pub children: Vec<(u16, NodeA<T>)>,
+    pub data: Vec<T>,
 }
 
-impl <T> PrefixMap<T> for Trie<T> {
+impl<T> Node<T> for NodeA<T> {
+    #[inline]
+    fn new() -> Self { Self { children: vec![], data: vec![] } }
+
+    #[inline]
+    fn search(&self, ch: u16) -> Result<usize, usize> {
+        self.children.binary_search_by_key(&ch, |&(c, _)| c)
+    }
+
+    #[inline]
+    fn next_node(&self, index: usize) -> &Self {
+        &self.children[index].1
+    }
+
+    #[inline]
+    fn search_or_create(&mut self, ch: u16) -> &mut Self {
+        let index = match self.search(ch) {
+            Ok(index) => index,
+            Err(index) => {
+                self.children.insert(index, (ch, Node::new()));
+                index
+            }
+        };
+        &mut self.children[index].1
+    }
+
+    #[inline]
+    fn get_data(&self) -> &[T] {
+        &self.data
+    }
+
+    #[inline]
+    fn push_data(&mut self, data: T) {
+        self.data.push(data);
+    }
+
+    fn count_data(&self) -> usize {
+        let child_count: usize = self.children.iter()
+            .map(|(_, n)| n.count_data())
+            .sum();
+        child_count + self.data.len()
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct NodeB<T> {
+    pub labels: Vec<u16>,
+    pub nodes: Vec<NodeB<T>>,
+    pub data: Vec<T>,
+}
+
+impl<T> Node<T> for NodeB<T> {
+    #[inline]
+    fn new() -> Self { Self { labels: vec![], nodes: vec![], data: vec![] } }
+
+    #[inline]
+    fn search(&self, ch: u16) -> Result<usize, usize> {
+        self.labels.binary_search_by_key(&ch, |&c| c)
+    }
+
+    #[inline]
+    fn next_node(&self, index: usize) -> &Self {
+        &self.nodes[index]
+    }
+
+    #[inline]
+    fn search_or_create(&mut self, ch: u16) -> &mut Self {
+        let index = match self.search(ch) {
+            Ok(index) => index,
+            Err(index) => {
+                self.labels.insert(index, ch);
+                self.nodes.insert(index, Node::new());
+                index
+            }
+        };
+        &mut self.nodes[index]
+    }
+
+    #[inline]
+    fn get_data(&self) -> &[T] {
+        &self.data
+    }
+
+    #[inline]
+    fn push_data(&mut self, data: T) {
+        self.data.push(data);
+    }
+
+    fn count_data(&self) -> usize {
+        let child_count: usize = self.nodes.iter()
+            .map(|n| n.count_data())
+            .sum();
+        child_count + self.data.len()
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Trie<N> {
+    pub(crate) root: N,
+}
+
+impl<T, N: Node<T>> PrefixMap<T> for Trie<N> {
 
     #[inline]
     fn new() -> Self {

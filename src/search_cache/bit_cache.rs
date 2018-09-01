@@ -13,10 +13,27 @@ fn round_up(value: usize) -> usize {
 
 pub struct BitCache(Vec<Bits>);
 
-impl BitCache {
+impl SearchCache for BitCache {
 
     #[inline]
-    fn is_filled(&self, index: usize) -> bool {
+    fn new(size: usize) -> Self {
+        BitCache(vec![0; round_up(size)])
+    }
+
+    #[inline]
+    fn extend(&mut self, size: usize) {
+        self.0.resize(round_up(size), 0);
+    }
+
+    #[inline]
+    fn mark(&mut self, index: usize) {
+        let a = index / NUM_BITS;
+        let b = index % NUM_BITS;
+        self.0[a] |= 1 << b;
+    }
+
+    #[inline]
+    fn is_filled(&self, index: usize, _check: &[u32]) -> bool {
         let data = &self.0;
         let a = index / NUM_BITS;
         let b = index % NUM_BITS;
@@ -24,7 +41,7 @@ impl BitCache {
     }
 
     #[inline]
-    fn find_base_one(&self, ch: usize, search_start: usize) -> usize {
+    fn find_empty(&self, ch: usize, search_start: usize, _check: &[u32]) -> usize {
         let data = &self.0;
         let ix = ch + search_start + 1;
         let a = ix / NUM_BITS;
@@ -49,38 +66,5 @@ impl BitCache {
         }
 
         return a * NUM_BITS + b - ch;
-    }
-}
-
-impl SearchCache for BitCache {
-
-    #[inline]
-    fn new(size: usize) -> Self { BitCache(vec![0; round_up(size)]) }
-
-    #[inline]
-    fn extend(&mut self, size: usize) { self.0.resize(round_up(size), 0); }
-
-    #[inline]
-    fn mark(&mut self, index: usize) {
-        let a = index / NUM_BITS;
-        let b = index % NUM_BITS;
-        self.0[a] |= 1 << b;
-    }
-
-    #[inline]
-    fn find_base<T>(&self, _check: &[u32], children: &[(u16, T)]) -> usize {
-        let ch = children[0].0 as usize;
-
-        let mut index = 0;
-        'outer: loop {
-            index = self.find_base_one(ch, index);
-            // println!("bit: index = {}", index);
-            for &(ch, _) in &children[1..] {
-                if self.is_filled(index + ch as usize) {
-                    continue 'outer;
-                }
-            }
-            return index;
-        }
     }
 }

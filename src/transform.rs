@@ -7,12 +7,12 @@ use bincode;
 use super::AsUtf16;
 use dictionary::{PrefixMap, Dictionary, Info};
 use double_array::DoubleArray;
-use trie::{Node, Trie};
+use trie::{NodeA, Trie};
 use search_cache::*;
 
 pub enum Trans<T> {
     Array(Box<DoubleArray<T>>),
-    Trie(Box<Trie<T>>),
+    Trie(Box<Trie<NodeA<T>>>),
 }
 
 impl<T> PrefixMap<T> for Trans<T> {
@@ -80,7 +80,7 @@ impl Dictionary for Trans<Info> {
     }
 }
 
-pub fn transform<T>(trie: Trie<T>) -> DoubleArray<T> {
+pub fn transform<T>(trie: Trie<NodeA<T>>) -> DoubleArray<T> {
     // let before_count = trie.count();
     let mut base = vec![0, 0];
     let mut check = vec![0, 0];
@@ -91,7 +91,7 @@ pub fn transform<T>(trie: Trie<T>) -> DoubleArray<T> {
     // let mut cache = BoolCache::new(2);
     let mut cache = BitCache::new(2);
     // let mut cache = LinkCache::new(2);
-    // let mut cache = DoubleCheck::<BitCache, LinkCache>::new(2);
+    // let mut cache = DoubleCheck::<BitCache, NoCache>::new(2);
 
     put_rec(trie.root, 1, &mut base, &mut check, &mut data, &mut cache);
     let da = DoubleArray::from_raw_parts(base, check, data);
@@ -104,7 +104,7 @@ pub fn transform<T>(trie: Trie<T>) -> DoubleArray<T> {
 }
 
 fn put_rec<T, C: SearchCache>(
-    mut node: Node<T>,
+    mut node: NodeA<T>,
     base_index: usize,
     base: &mut Vec<u32>,
     check: &mut Vec<u32>,
@@ -118,10 +118,23 @@ fn put_rec<T, C: SearchCache>(
         return;
     }
 
-    let new_base = cache.find_base(&check[..], &node.children);
+    let new_base = {
+        let ch = node.children[0].0 as usize;
+
+        let mut index = 0;
+        'outer: loop {
+            index = cache.find_empty(ch, index, check);
+            for &(ch, _) in &node.children[1..] {
+                if cache.is_filled(index + ch as usize, check) {
+                    continue 'outer;
+                }
+            }
+            break index;
+        }
+    };
     base[base_index] = new_base as u32;
 
-    let requred_size = new_base + node.children.last().expect("childは存在する").0 as usize + 1;
+    let requred_size = new_base + node.children.last().unwrap().0 as usize + 1;
     if requred_size > base.len() {
         base.resize(requred_size, 0);
         check.resize(requred_size, 0);

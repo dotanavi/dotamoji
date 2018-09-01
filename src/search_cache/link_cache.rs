@@ -6,29 +6,6 @@ pub struct LinkCache {
     next_links: Vec<u32>,
 }
 
-impl LinkCache {
-
-    #[inline]
-    fn is_filled(&self, index: usize) -> bool {
-        index < self.next_links.len() && self.next_links[index] == 0
-    }
-
-    #[inline]
-    fn find_base_one(&self, ch: usize, search_start: usize) -> usize {
-        let links = &self.next_links;
-
-        let mut ix = ch + search_start;
-        if ix < links.len() && links[ix] != 0 {
-            return links[ix] as usize - ch
-        }
-        ix += 1;
-        while ix < links.len() && links[ix] == 0 {
-            ix += 1;
-        }
-        return ix - ch;
-    }
-}
-
 impl SearchCache for LinkCache {
     #[inline]
     fn new(size: usize) -> Self {
@@ -69,8 +46,8 @@ impl SearchCache for LinkCache {
         let next = self.next_links[index] as usize;
         // println!("mark: {} ({} <-> {})", index, prev, next);
 
-        debug_assert!(!self.is_filled(prev as usize), "prev[{}] is filled({:?})", prev, self.next_links.get(prev));
-        debug_assert!(!self.is_filled(next as usize), "next[{}] is filled({:?})", next, self.next_links.get(next));
+        // debug_assert!(!self.is_filled(prev as usize), "prev[{}] is filled({:?})", prev, self.next_links.get(prev));
+        // debug_assert!(!self.is_filled(next as usize), "next[{}] is filled({:?})", next, self.next_links.get(next));
 
         self.prev_links[next] = prev as u32;
         self.next_links[prev] = next as u32;
@@ -80,19 +57,23 @@ impl SearchCache for LinkCache {
     }
 
     #[inline]
-    fn find_base<T>(&self, _check: &[u32], children: &[(u16, T)]) -> usize {
-        let ch = children[0].0 as usize;
+    fn is_filled(&self, index: usize, _check: &[u32]) -> bool {
+        index < self.next_links.len() && self.next_links[index] == 0
+    }
 
-        let mut index = 0;
-        'outer: loop {
-            index = self.find_base_one(ch, index);
-            for &(ch, _) in &children[1..] {
-                if self.is_filled(index + ch as usize) {
-                    continue 'outer;
-                }
-            }
-            return index;
+    #[inline]
+    fn find_empty(&self, ch: usize, search_start: usize, _check: &[u32]) -> usize {
+        let links = &self.next_links;
+
+        let mut ix = ch + search_start;
+        if ix < links.len() && links[ix] != 0 {
+            return links[ix] as usize - ch
         }
+        ix += 1;
+        while ix < links.len() && links[ix] == 0 {
+            ix += 1;
+        }
+        return ix - ch;
     }
 }
 

@@ -14,6 +14,8 @@ function analyze () {
   local build_type="$1"
   local binary_format="${2:-$1}"
 
+  echo "----------------------------------------------------------------"
+  echo
   echo "$sentence" | (set -x; "$out_dir/analyze" "$binary_format" "$save_dir/${build_type}_all.dic" "$matrix_file")
   if [ $? != 0 ]; then
     echo
@@ -33,6 +35,7 @@ echo
 
 set +e # エラー無視
 analyze array
-analyze trie
+analyze trie_a
+analyze trie_b
 analyze hash
 analyze trans array

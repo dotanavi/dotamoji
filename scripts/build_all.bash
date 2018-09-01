@@ -14,6 +14,8 @@ function build () {
   local binary_format="${2:-$1}"
 
   echo
+  echo "----------------------------------------------------------------"
+  echo
   (
     set -x
     time "$out_dir/build-dict" "$build_type" "$save_dir/${build_type}_all.dic" < $dic_file
@@ -29,6 +31,7 @@ mkdir -p "$save_dir"
 )
 
 build trans array
-build trie
+build trie_a
+build trie_b
 build hash
 # build array
