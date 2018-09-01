@@ -8,8 +8,7 @@ use super::AsUtf16;
 use dictionary::{PrefixMap, Dictionary, Info};
 use double_array::DoubleArray;
 use trie::{Node, Trie};
-use search_cache::SearchCache;
-use search_cache::bit_cache::BitCache;
+use search_cache::*;
 
 pub enum Trans<T> {
     Array(Box<DoubleArray<T>>),
@@ -88,8 +87,11 @@ pub fn transform<T>(trie: Trie<T>) -> DoubleArray<T> {
     let mut data = vec![vec![], vec![]];
 
     // let mut cache = NoCache::new(2);
+    // let mut cache = DoubleCheck::<BitCache, NoCache>::new(2);
     // let mut cache = BoolCache::new(2);
     let mut cache = BitCache::new(2);
+    // let mut cache = LinkCache::new(2);
+    // let mut cache = DoubleCheck::<BitCache, LinkCache>::new(2);
 
     put_rec(trie.root, 1, &mut base, &mut check, &mut data, &mut cache);
     let da = DoubleArray::from_raw_parts(base, check, data);

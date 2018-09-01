@@ -74,6 +74,7 @@ impl SearchCache for BitCache {
         let mut index = 0;
         'outer: loop {
             index = self.find_base_one(ch, index);
+            // println!("bit: index = {}", index);
             for &(ch, _) in &children[1..] {
                 if self.is_filled(index + ch as usize) {
                     continue 'outer;

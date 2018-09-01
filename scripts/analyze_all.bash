@@ -14,10 +14,7 @@ function analyze () {
   local build_type="$1"
   local binary_format="${2:-$1}"
 
-  echo "$sentence" | (
-    set -x
-    "$out_dir/analyze" "$binary_format" "$save_dir/${build_type}_all.dic" "$matrix_file"
-  )
+  echo "$sentence" | (set -x; "$out_dir/analyze" "$binary_format" "$save_dir/${build_type}_all.dic" "$matrix_file")
   if [ $? != 0 ]; then
     echo
     echo "コマンドが正常終了しませんでした。以下のコマンドでデバッグ実行してください"
