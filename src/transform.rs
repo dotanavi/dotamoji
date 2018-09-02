@@ -81,7 +81,8 @@ impl Dictionary for Trans<Info> {
 }
 
 pub fn transform<T>(trie: Trie<NodeA<T>>) -> DoubleArray<T> {
-    // let before_count = trie.count();
+    // show_stats(&trie.root);
+
     let mut base = vec![0, 0];
     let mut check = vec![0, 0];
     let mut data = vec![vec![], vec![]];
@@ -94,13 +95,7 @@ pub fn transform<T>(trie: Trie<NodeA<T>>) -> DoubleArray<T> {
     // let mut cache = DoubleCheck::<BitCache, NoCache>::new(2);
 
     put_rec(trie.root, 1, &mut base, &mut check, &mut data, &mut cache);
-    let da = DoubleArray::from_raw_parts(base, check, data);
-
-    // let after_count = da.count();
-    // if before_count != after_count {
-    //     panic!("正しく変換できていません。 before = {}, after = {}", before_count, after_count);
-    // }
-    return da;
+    return DoubleArray::from_raw_parts(base, check, data);
 }
 
 fn put_rec<T, C: SearchCache>(
@@ -151,6 +146,30 @@ fn put_rec<T, C: SearchCache>(
         put_rec(child_node, new_base + ch as usize, base, check, data, cache);
     }
 }
+
+#[allow(unused)]
+fn show_stats<T>(node: &NodeA<T>) {
+    let mut table = vec![];
+    calc_stats_rec(node, &mut table);
+
+    for (ix, cnt) in table.iter().enumerate() {
+        if *cnt > 0 {
+            println!("{:>5}:{:>5}", ix, cnt);
+        }
+    }
+}
+
+fn calc_stats_rec<T>(node: &NodeA<T>, table: &mut Vec<u8>) {
+    let len = node.children.len();
+    if len >= table.len() {
+        table.resize(len + 1, 0);
+    }
+    table[len] += 1;
+    for (_, node) in &node.children {
+        calc_stats_rec(&node, table);
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
