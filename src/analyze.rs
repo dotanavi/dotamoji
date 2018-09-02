@@ -1,5 +1,4 @@
 use std::i32;
-use std::time::Instant;
 
 use super::*;
 
@@ -21,6 +20,58 @@ impl Node {
     }
 }
 
+pub struct Analyzed {
+    sentence: Vec<u16>,
+    nodes: Vec<Vec<Node>>,
+    pub cost: i32,
+    index: u8,
+}
+
+impl Analyzed {
+    #[inline]
+    pub fn iter(&self) -> Iter {
+        Iter {
+            x: self.index,
+            y: 0,
+            analyzed: &self,
+        }
+    }
+}
+
+pub struct Token<'a> {
+    pub word: &'a [u16],
+    pub id: u16,
+    pub cost: i32,
+}
+
+pub struct Iter<'a> {
+    x: u8,
+    y: u32,
+    analyzed: &'a Analyzed,
+}
+
+impl<'a> Iterator for Iter<'a> {
+    type Item = Token<'a>;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        let nodes = &self.analyzed.nodes;
+        let node = &nodes[nodes.len() - (self.y as usize) - 1][self.x as usize];
+        if node.len == 0 {
+            return None;
+        }
+        let index = self.y as usize;
+        self.x = node.next;
+        self.y += node.len as u32;
+        let slice = &self.analyzed.sentence[index..self.y as usize];
+        Some(Token {
+            word: slice,
+            id: node.id,
+            cost: node.cost,
+        })
+    }
+}
+
 #[inline]
 fn find_min_cost(src_id: u16, nodes: &[Node], matrix: &Matrix) -> Option<(usize, i32)> {
     nodes
@@ -30,67 +81,45 @@ fn find_min_cost(src_id: u16, nodes: &[Node], matrix: &Matrix) -> Option<(usize,
         .min_by_key(|pair| pair.1)
 }
 
-pub fn analyze<D: PrefixMap<Info>>(dic: &D, matrix: &Matrix, sentence: &str) {
-    let start = Instant::now();
-    let sentence: Vec<u16> = sentence.encode_utf16().collect();
-
-    if let Ok(nodes) = analyze_inner(dic, matrix, &sentence) {
-        let node_len = nodes.len();
-        let last_node = &nodes[node_len - 1][0];
-        eprintln!("analyze: {:?}", start.elapsed());
-        println!("cost = {}", last_node.cost);
-        let mut x = last_node.next as usize;
-        let mut y = 0;
-        loop {
-            let node = &nodes[node_len - y - 2][x];
-            if node.len == 0 {
-                break;
-            }
-            debug_print(&sentence, y, &node);
-            x = node.next as usize;
-            y += node.len as usize;
-        }
-    } else {
-        println!("形態素解析に失敗しました。");
-    }
-}
-
-fn analyze_inner<D: PrefixMap<Info>>(
+#[inline]
+pub fn analyze<D: PrefixMap<Info>>(
+    sentence: &str,
     dic: &D,
     matrix: &Matrix,
-    sentence: &[u16],
-) -> Result<Vec<Vec<Node>>, ()> {
-    let mut nodes = vec![vec![Node::new(0, 0, 0, 0)]];
+) -> Result<Analyzed, ()> {
+    let sentence: Vec<u16> = sentence.encode_utf16().collect();
+    let mut nodes = Vec::with_capacity(sentence.len() + 1);
+    nodes.push(vec![Node::new(0, 0, 0, 0)]);
     for ix in (0..sentence.len()).rev() {
         debug_assert!(nodes.len() == sentence.len() - ix);
         let mut column = vec![];
         dic.each_prefix16(&sentence[ix..], |len, info_list| {
             let search_nodes = &nodes[nodes.len() - len];
             for info in info_list {
-                if let Some((index, min_cost)) = find_min_cost(info.right_id, search_nodes, matrix)
-                {
-                    column.push(Node::new(
-                        info.left_id,
-                        min_cost + info.cost as i32,
-                        len as u8,
-                        index as u8,
-                    ));
+                match find_min_cost(info.right_id, search_nodes, matrix) {
+                    Some((index, min_cost)) => {
+                        column.push(Node::new(
+                            info.left_id,
+                            min_cost + info.cost as i32,
+                            len as u8,
+                            index as u8,
+                        ));
+                    }
+                    None => (),
                 }
             }
         });
         nodes.push(column);
     }
-    if let Some((index, min_cost)) = find_min_cost(0, nodes.last().unwrap(), matrix) {
-        nodes.push(vec![Node::new(0, min_cost, 0, index as u8)]);
-        return Ok(nodes);
+    debug_assert_eq!(nodes.len(), sentence.len() + 1);
+    if let Some((index, cost)) = find_min_cost(0, nodes.last().unwrap(), matrix) {
+        Ok(Analyzed {
+            sentence,
+            nodes,
+            cost,
+            index: index as u8,
+        })
     } else {
         return Err(());
     }
-}
-
-#[inline]
-fn debug_print(sentence: &[u16], start_ix: usize, node: &Node) {
-    let slice = &sentence[start_ix..start_ix + node.len as usize];
-    let word = String::from_utf16_lossy(slice);
-    println!("id:{:>5} | cost:{:>6} | {}", node.id, node.cost, word);
 }

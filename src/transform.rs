@@ -170,7 +170,6 @@ fn calc_stats_rec<T>(node: &NodeA<T>, table: &mut Vec<u8>) {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
