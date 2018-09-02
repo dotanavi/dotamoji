@@ -28,10 +28,15 @@ cargo build --release
 ./target/release/build-dict array [出力ファイル] < [辞書テキスト]
 ```
 
-ダブル配列の代わりに、再帰ハッシュマップで構築した辞書も作成できます。
+ダブル配列以外の形式にも対応しています。
+
+- `array`: ダブル配列
+- `hash`: 再帰ハッシュマップ
+- `trie`: トライ木
+- `trans`: トライ木でパース、ダブル配列として保存
 
 ```
-./target/release/build-dict hash [出力ファイル] < [辞書テキスト]
+./target/release/build-dict [変換オプション] [出力ファイル] < [辞書テキスト]
 ```
 
 ### 確認
@@ -42,6 +47,8 @@ cargo build --release
 ./target/release/test-dict array [出力された辞書ファイル] < [辞書テキスト]
 ```
 
+`array` の他に、 `hash`, `trie` が利用できます。
+
 ### 形態素解析
 
 標準入力を形態素解析します。
@@ -49,3 +56,6 @@ cargo build --release
 ```
 echo "すもももももももものうち" | ./target/release/analyze array [出力された辞書ファイル] [連結コストファイル]
 ```
+
+`array` の他に、 `hash`, `trie` が利用できます。
+

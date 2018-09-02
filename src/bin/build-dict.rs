@@ -41,7 +41,7 @@ fn main() {
     match dictype.as_str() {
         "array" => build::<DoubleArrayDict>(&file),
         "hash" => build::<RecHashDict>(&file),
-        "trie_a" => build::<TrieDictA>(&file),
+        "trie" | "trie_a" => build::<TrieDictA>(&file),
         "trie_b" => build::<TrieDictB>(&file),
         "trans" => build::<TransDict>(&file),
         _ => panic!("不明なタイプです。"),
