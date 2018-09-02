@@ -1,4 +1,4 @@
-use super::{PrefixMap, AsUtf16};
+use super::{AsUtf16, PrefixMap};
 
 pub trait Node<T> {
     fn new() -> Self;
@@ -39,7 +39,12 @@ pub trait Node<T> {
         }
     }
 
-    fn dig_yield<I: Iterator<Item = u16>, F: FnMut(usize, &[T])>(&self, depth: usize, mut iter: I, mut f: F) {
+    fn dig_yield<I: Iterator<Item = u16>, F: FnMut(usize, &[T])>(
+        &self,
+        depth: usize,
+        mut iter: I,
+        mut f: F,
+    ) {
         let data = self.get_data();
         if data.len() > 0 {
             f(depth, data);
@@ -60,7 +65,12 @@ pub struct NodeA<T> {
 
 impl<T> Node<T> for NodeA<T> {
     #[inline]
-    fn new() -> Self { Self { children: vec![], data: vec![] } }
+    fn new() -> Self {
+        Self {
+            children: vec![],
+            data: vec![],
+        }
+    }
 
     #[inline]
     fn search(&self, ch: u16) -> Result<usize, usize> {
@@ -95,9 +105,7 @@ impl<T> Node<T> for NodeA<T> {
     }
 
     fn count_data(&self) -> usize {
-        let child_count: usize = self.children.iter()
-            .map(|(_, n)| n.count_data())
-            .sum();
+        let child_count: usize = self.children.iter().map(|(_, n)| n.count_data()).sum();
         child_count + self.data.len()
     }
 }
@@ -111,7 +119,13 @@ pub struct NodeB<T> {
 
 impl<T> Node<T> for NodeB<T> {
     #[inline]
-    fn new() -> Self { Self { labels: vec![], nodes: vec![], data: vec![] } }
+    fn new() -> Self {
+        Self {
+            labels: vec![],
+            nodes: vec![],
+            data: vec![],
+        }
+    }
 
     #[inline]
     fn search(&self, ch: u16) -> Result<usize, usize> {
@@ -147,9 +161,7 @@ impl<T> Node<T> for NodeB<T> {
     }
 
     fn count_data(&self) -> usize {
-        let child_count: usize = self.nodes.iter()
-            .map(|n| n.count_data())
-            .sum();
+        let child_count: usize = self.nodes.iter().map(|n| n.count_data()).sum();
         child_count + self.data.len()
     }
 }
@@ -160,7 +172,6 @@ pub struct Trie<N> {
 }
 
 impl<T, N: Node<T>> PrefixMap<T> for Trie<N> {
-
     #[inline]
     fn new() -> Self {
         Trie { root: Node::new() }
@@ -191,4 +202,3 @@ impl<T, N: Node<T>> PrefixMap<T> for Trie<N> {
         self.root.dig_set(key.as_utf16(), value);
     }
 }
-

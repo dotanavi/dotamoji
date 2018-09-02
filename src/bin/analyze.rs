@@ -1,8 +1,8 @@
 extern crate dotamoji;
 
-use std::time::Instant;
 use std::env;
 use std::io::{self, BufRead};
+use std::time::Instant;
 
 use dotamoji::*;
 
@@ -22,13 +22,18 @@ fn analyze<D: Dictionary>(dic_file: &str, mat_file: &str) {
     }
 }
 
-
 fn main() {
     let mut args = env::args();
     let _ = args.next().expect("実行ファイルが不明！？");
-    let dictype = args.next().expect("タイプが指定されていません。");
-    let dic_file = args.next().expect("辞書ファイルが指定されていません。");
-    let mat_file = args.next().expect("コスト行列ファイルが指定されていません。");
+    let dictype = args
+        .next()
+        .expect("タイプが指定されていません。");
+    let dic_file = args
+        .next()
+        .expect("辞書ファイルが指定されていません。");
+    let mat_file = args
+        .next()
+        .expect("コスト行列ファイルが指定されていません。");
 
     match dictype.as_str() {
         "array" => analyze::<DoubleArrayDict>(&dic_file, &mat_file),

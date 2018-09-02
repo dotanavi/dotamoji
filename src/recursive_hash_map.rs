@@ -1,6 +1,6 @@
-use fnv::{FnvHashMap as HashMap};
+use fnv::FnvHashMap as HashMap;
 // use std::collections::HashMap;
-use super::{PrefixMap, AsUtf16};
+use super::{AsUtf16, PrefixMap};
 
 #[derive(Serialize, Deserialize)]
 pub struct RecursiveHashMap<T> {
@@ -12,7 +12,11 @@ pub struct RecursiveHashMap<T> {
 impl<T> PrefixMap<T> for RecursiveHashMap<T> {
     #[inline]
     fn new() -> Self {
-        Self { id: 0, link: Default::default(), data: Default::default() }
+        Self {
+            id: 0,
+            link: Default::default(),
+            data: Default::default(),
+        }
     }
 
     #[inline]
@@ -76,14 +80,16 @@ impl<T> PrefixMap<T> for RecursiveHashMap<T> {
         let mut current_id = 0;
         for ch in key.as_utf16() {
             let entry = link.entry((current_id, ch));
-            let next_id = entry.or_insert_with(|| { *id += 1; *id });
+            let next_id = entry.or_insert_with(|| {
+                *id += 1;
+                *id
+            });
             current_id = *next_id;
         }
         let vec = data.entry(current_id).or_insert_with(Default::default);
         vec.push(value);
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -187,9 +193,9 @@ mod tests {
         pt.each_prefix("abcd", |chars, data| {
             vec.push((String::from_utf16_lossy(chars), data.to_owned()));
         });
-        assert_eq!(vec, vec![
-            ("a".to_string(), vec![4, 5]),
-            ("abc".to_string(), vec![1]),
-        ]);
+        assert_eq!(
+            vec,
+            vec![("a".to_string(), vec![4, 5]), ("abc".to_string(), vec![1])]
+        );
     }
 }

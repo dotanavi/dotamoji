@@ -17,7 +17,6 @@ pub struct Matrix {
 }
 
 impl Matrix {
-
     #[inline]
     pub fn get(&self, src_id: u16, dst_id: u16) -> i16 {
         self.cost[src_id as usize * self.height as usize + dst_id as usize]
@@ -42,6 +41,10 @@ impl Matrix {
             let c = read_int(row.next().expect("No cost"));
             cost[h * height as usize + w] = c;
         }
-        Matrix { width, height, cost }
+        Matrix {
+            width,
+            height,
+            cost,
+        }
     }
 }

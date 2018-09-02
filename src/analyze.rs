@@ -12,13 +12,19 @@ struct Node {
 
 impl Node {
     fn new(id: u16, cost: i32, len: u8, next: u8) -> Node {
-        Node { id, cost, len, next }
+        Node {
+            id,
+            cost,
+            len,
+            next,
+        }
     }
 }
 
 #[inline]
-fn find_min_cost(src_id: u16, nodes: &[Node], matrix: &Matrix) -> Option<(usize, i32)>{
-    nodes.iter()
+fn find_min_cost(src_id: u16, nodes: &[Node], matrix: &Matrix) -> Option<(usize, i32)> {
+    nodes
+        .iter()
         .map(|nd| nd.cost + matrix.get(src_id, nd.id) as i32)
         .enumerate()
         .min_by_key(|pair| pair.1)
@@ -37,7 +43,9 @@ pub fn analyze<D: PrefixMap<Info>>(dic: &D, matrix: &Matrix, sentence: &str) {
         let mut y = 0;
         loop {
             let node = &nodes[node_len - y - 2][x];
-            if node.len == 0 { break; }
+            if node.len == 0 {
+                break;
+            }
             debug_print(&sentence, y, &node);
             x = node.next as usize;
             y += node.len as usize;
@@ -47,7 +55,11 @@ pub fn analyze<D: PrefixMap<Info>>(dic: &D, matrix: &Matrix, sentence: &str) {
     }
 }
 
-fn analyze_inner<D: PrefixMap<Info>>(dic: &D, matrix: &Matrix, sentence: &[u16]) -> Result<Vec<Vec<Node>>, ()> {
+fn analyze_inner<D: PrefixMap<Info>>(
+    dic: &D,
+    matrix: &Matrix,
+    sentence: &[u16],
+) -> Result<Vec<Vec<Node>>, ()> {
     let mut nodes = vec![vec![Node::new(0, 0, 0, 0)]];
     for ix in (0..sentence.len()).rev() {
         debug_assert!(nodes.len() == sentence.len() - ix);
@@ -55,8 +67,14 @@ fn analyze_inner<D: PrefixMap<Info>>(dic: &D, matrix: &Matrix, sentence: &[u16])
         dic.each_prefix16(&sentence[ix..], |len, info_list| {
             let search_nodes = &nodes[nodes.len() - len];
             for info in info_list {
-                if let Some((index, min_cost)) = find_min_cost(info.right_id, search_nodes, matrix) {
-                    column.push(Node::new(info.left_id, min_cost + info.cost as i32, len as u8, index as u8));
+                if let Some((index, min_cost)) = find_min_cost(info.right_id, search_nodes, matrix)
+                {
+                    column.push(Node::new(
+                        info.left_id,
+                        min_cost + info.cost as i32,
+                        len as u8,
+                        index as u8,
+                    ));
                 }
             }
         });
@@ -72,7 +90,7 @@ fn analyze_inner<D: PrefixMap<Info>>(dic: &D, matrix: &Matrix, sentence: &[u16])
 
 #[inline]
 fn debug_print(sentence: &[u16], start_ix: usize, node: &Node) {
-    let slice = &sentence[start_ix .. start_ix + node.len as usize];
+    let slice = &sentence[start_ix..start_ix + node.len as usize];
     let word = String::from_utf16_lossy(slice);
     println!("id:{:>5} | cost:{:>6} | {}", node.id, node.cost, word);
 }

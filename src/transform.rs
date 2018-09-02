@@ -1,14 +1,14 @@
 use std::fs::File;
-use std::io::{BufWriter};
+use std::io::BufWriter;
 use std::mem::swap;
 
 use bincode;
 
 use super::AsUtf16;
-use dictionary::{PrefixMap, Dictionary, Info};
+use dictionary::{Dictionary, Info, PrefixMap};
 use double_array::DoubleArray;
-use trie::{NodeA, Trie};
 use search_cache::*;
+use trie::{NodeA, Trie};
 
 pub enum Trans<T> {
     Array(Box<DoubleArray<T>>),
@@ -139,7 +139,7 @@ fn put_rec<T, C: SearchCache>(
         base.resize(requred_size, 0);
         check.resize(requred_size, 0);
         let n = data.len();
-        data.extend((n .. requred_size).map(|_| vec![]));
+        data.extend((n..requred_size).map(|_| vec![]));
         cache.extend(requred_size);
     }
     for &(ch, _) in &node.children {

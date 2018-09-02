@@ -1,4 +1,3 @@
-
 use super::SearchCache;
 
 pub struct LinkCache {
@@ -12,11 +11,11 @@ impl SearchCache for LinkCache {
         let size = size + 1;
         let mut prev = Vec::with_capacity(size);
         prev.push(0);
-        prev.extend(0 .. size as u32 - 1);
+        prev.extend(0..size as u32 - 1);
         debug_assert_eq!(prev.len(), size);
 
         let mut next = Vec::with_capacity(size);
-        next.extend(1 .. size as u32 + 1);
+        next.extend(1..size as u32 + 1);
         debug_assert_eq!(prev.len(), size);
 
         LinkCache {
@@ -30,8 +29,8 @@ impl SearchCache for LinkCache {
         let size = size as u32 + 1;
         let len = self.next_links.len() as u32;
 
-        self.prev_links.extend(len - 1 .. size - 1);
-        self.next_links.extend(len + 1 .. size + 1);
+        self.prev_links.extend(len - 1..size - 1);
+        self.next_links.extend(len + 1..size + 1);
 
         let size = size as usize;
         debug_assert_eq!(self.prev_links.len(), size);
@@ -67,7 +66,7 @@ impl SearchCache for LinkCache {
 
         let mut ix = ch + search_start;
         if ix < links.len() && links[ix] != 0 {
-            return links[ix] as usize - ch
+            return links[ix] as usize - ch;
         }
         ix += 1;
         while ix < links.len() && links[ix] == 0 {
@@ -76,4 +75,3 @@ impl SearchCache for LinkCache {
         return ix - ch;
     }
 }
-

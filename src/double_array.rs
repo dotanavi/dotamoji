@@ -1,8 +1,19 @@
-use std::{char, u16, cmp::{max, min}, fmt::Debug};
-use super::{PrefixMap, AsUtf16};
+use super::{AsUtf16, PrefixMap};
+use std::{
+    char,
+    cmp::{max, min},
+    fmt::Debug,
+    u16,
+};
 
 #[derive(Eq, PartialEq)]
-enum Index { Zero, Transit, Empty, Conflict, OutOfRange }
+enum Index {
+    Zero,
+    Transit,
+    Empty,
+    Conflict,
+    OutOfRange,
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct DoubleArray<T> {
@@ -111,9 +122,7 @@ impl<T> DoubleArray<T> {
             let (state, next_ix) = self.next_index(current_ix, ch);
             current_ix = match state {
                 Index::Transit => next_ix,
-                Index::Empty => {
-                    self.update(current_ix, next_ix)
-                }
+                Index::Empty => self.update(current_ix, next_ix),
                 Index::Zero => {
                     let new_next_ix = self.put_first_one(current_ix, ch);
                     self.update(current_ix, new_next_ix)
@@ -121,11 +130,11 @@ impl<T> DoubleArray<T> {
                 Index::Conflict => {
                     let new_next_ix = self.rebase(current_ix, ch);
                     self.update(current_ix, new_next_ix)
-                },
+                }
                 Index::OutOfRange => {
                     self.extend(next_ix + 1);
                     self.update(current_ix, next_ix)
-                },
+                }
             };
         }
         // データを登録
@@ -148,7 +157,7 @@ impl<T> DoubleArray<T> {
 
     #[inline]
     fn find_new_base_one(&mut self, ch: u16) -> usize {
-        for i in ch as usize + 1 .. self.check.len() {
+        for i in ch as usize + 1..self.check.len() {
             if self.check[i] == 0 {
                 return i;
             }
@@ -163,7 +172,7 @@ impl<T> DoubleArray<T> {
         debug_assert!(current_base > 0);
         // 1. currIdx から遷移しているすべてのノード(遷移先ノード)を取得 (index, char)
         let mut next_nodes = vec![];
-        for i in current_base .. min(self.check.len(), current_base + u16::MAX as usize) {
+        for i in current_base..min(self.check.len(), current_base + u16::MAX as usize) {
             if self.check[i] as usize == current_ix {
                 next_nodes.push((i - current_base) as u16);
             }
@@ -189,7 +198,7 @@ impl<T> DoubleArray<T> {
                 // 4. 旧遷移先ノードから更に遷移しているノードの check を新遷移先ノードの index で更新
                 let src_ix = src_ix as u32;
                 let dst_ix = dst_ix as u32;
-                let range = src_base .. min(self.check.len(), src_base + u16::MAX as usize);
+                let range = src_base..min(self.check.len(), src_base + u16::MAX as usize);
                 for mut c in &mut self.check[range] {
                     if *c == src_ix {
                         *c = dst_ix
@@ -237,7 +246,7 @@ impl<T> DoubleArray<T> {
         self.base.resize(size, 0);
         self.check.resize(size, 0);
         let n = self.data.len();
-        self.data.extend((n .. size).map(|_| vec![]));
+        self.data.extend((n..size).map(|_| vec![]));
 
         debug_assert!(self.base.len() == size);
         debug_assert!(self.check.len() == size);
@@ -247,28 +256,48 @@ impl<T> DoubleArray<T> {
 
 impl<T: Debug> DoubleArray<T> {
     pub fn show_debug(&self) {
-        for i in 0 .. self.check.len() {
-            if self.base[i] == 0 { continue; }
+        for i in 0..self.check.len() {
+            if self.base[i] == 0 {
+                continue;
+            }
             let ch = char::from_u32(i as u32 - self.base[self.check[i] as usize] as u32);
-            println!("{}\t, {}\t, {}\t, {}\t, {:?}",
-                i, self.base[i], self.check[i], ch.unwrap(), self.data[i]);
+            println!(
+                "{}\t, {}\t, {}\t, {}\t, {:?}",
+                i,
+                self.base[i],
+                self.check[i],
+                ch.unwrap(),
+                self.data[i]
+            );
         }
     }
 }
 
 impl<T> PrefixMap<T> for DoubleArray<T> {
     #[inline]
-    fn new() -> Self { DoubleArray::new() }
+    fn new() -> Self {
+        DoubleArray::new()
+    }
     #[inline]
-    fn count(&self) -> usize { self.count() }
+    fn count(&self) -> usize {
+        self.count()
+    }
     #[inline]
-    fn get(&self, key: impl AsUtf16) -> Option<&[T]> { self.get(key) }
+    fn get(&self, key: impl AsUtf16) -> Option<&[T]> {
+        self.get(key)
+    }
     #[inline]
-    fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, f: F) { self.each_prefix(key, f) }
+    fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, f: F) {
+        self.each_prefix(key, f)
+    }
     #[inline]
-    fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], f: F) { self.each_prefix16(key, f) }
+    fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], f: F) {
+        self.each_prefix16(key, f)
+    }
     #[inline]
-    fn insert(&mut self, key: impl AsUtf16, value: T) { self.insert(key, value) }
+    fn insert(&mut self, key: impl AsUtf16, value: T) {
+        self.insert(key, value)
+    }
 }
 
 #[cfg(test)]
@@ -373,9 +402,9 @@ mod tests {
         pt.each_prefix("abcd", |chars, data| {
             vec.push((String::from_utf16_lossy(chars), data.to_owned()));
         });
-        assert_eq!(vec, vec![
-            ("a".to_string(), vec![4, 5]),
-            ("abc".to_string(), vec![1]),
-        ]);
+        assert_eq!(
+            vec,
+            vec![("a".to_string(), vec![4, 5]), ("abc".to_string(), vec![1])]
+        );
     }
 }

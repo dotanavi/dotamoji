@@ -4,13 +4,19 @@ pub struct BoolCache(Vec<bool>);
 
 impl SearchCache for BoolCache {
     #[inline]
-    fn new(size: usize) -> Self { BoolCache(vec![false; size]) }
+    fn new(size: usize) -> Self {
+        BoolCache(vec![false; size])
+    }
 
     #[inline]
-    fn extend(&mut self, size: usize) { self.0.resize(size, false); }
+    fn extend(&mut self, size: usize) {
+        self.0.resize(size, false);
+    }
 
     #[inline]
-    fn mark(&mut self, index: usize) { self.0[index] = true; }
+    fn mark(&mut self, index: usize) {
+        self.0[index] = true;
+    }
 
     #[inline]
     fn is_filled(&self, index: usize, _check: &[u32]) -> bool {

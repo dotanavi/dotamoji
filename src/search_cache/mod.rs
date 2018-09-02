@@ -1,14 +1,14 @@
-mod no_cache;
-mod bool_cache;
 mod bit_cache;
-mod link_cache;
+mod bool_cache;
 mod double_check;
+mod link_cache;
+mod no_cache;
 
-pub use self::no_cache::NoCache;
-pub use self::bool_cache::BoolCache;
 pub use self::bit_cache::BitCache;
-pub use self::link_cache::LinkCache;
+pub use self::bool_cache::BoolCache;
 pub use self::double_check::DoubleCheck;
+pub use self::link_cache::LinkCache;
+pub use self::no_cache::NoCache;
 
 pub trait SearchCache {
     fn new(size: usize) -> Self;

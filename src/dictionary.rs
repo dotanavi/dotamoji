@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufReader, BufWriter};
 
 use bincode;
-use serde::{Serialize, de::DeserializeOwned};
+use serde::{de::DeserializeOwned, Serialize};
 
 use super::AsUtf16;
 
@@ -15,7 +15,11 @@ pub struct Info {
 
 impl Info {
     pub fn new(left_id: u16, right_id: u16, cost: i16) -> Self {
-        Info { left_id, right_id, cost }
+        Info {
+            left_id,
+            right_id,
+            cost,
+        }
     }
 }
 
@@ -33,7 +37,10 @@ pub trait Dictionary: PrefixMap<Info> {
 
     fn save_to_file(self, file: &str) -> Self;
 }
-impl <D> Dictionary for D where D: PrefixMap<Info> + Serialize + DeserializeOwned {
+impl<D> Dictionary for D
+where
+    D: PrefixMap<Info> + Serialize + DeserializeOwned,
+{
     fn load_from_file(file: &str) -> Self {
         let file = File::open(file).expect("ファイルが開けません");
         let file = BufReader::new(file);
@@ -47,4 +54,3 @@ impl <D> Dictionary for D where D: PrefixMap<Info> + Serialize + DeserializeOwne
         self
     }
 }
-

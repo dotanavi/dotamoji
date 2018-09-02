@@ -14,7 +14,6 @@ fn round_up(value: usize) -> usize {
 pub struct BitCache(Vec<Bits>);
 
 impl SearchCache for BitCache {
-
     #[inline]
     fn new(size: usize) -> Self {
         BitCache(vec![0; round_up(size)])
@@ -50,7 +49,7 @@ impl SearchCache for BitCache {
         }
 
         let b = ix % NUM_BITS;
-        for b in b .. NUM_BITS {
+        for b in b..NUM_BITS {
             if (data[a] & (1 << b)) == 0 {
                 return a * NUM_BITS + b - ch;
             }

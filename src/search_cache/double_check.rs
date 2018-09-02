@@ -6,7 +6,6 @@ pub struct DoubleCheck<C1, C2> {
 }
 
 impl<C1: SearchCache, C2: SearchCache> SearchCache for DoubleCheck<C1, C2> {
-
     #[inline]
     fn new(size: usize) -> Self {
         DoubleCheck {
