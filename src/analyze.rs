@@ -109,6 +109,23 @@ pub fn analyze<D: PrefixMap<Info>>(
                 }
             }
         });
+        if column.len() == 0 {
+            // 未知語対応。とりあえず辞書にない単語はすべて一文字の固有名詞として扱う
+            let len = 1;
+            let search_nodes = &nodes[nodes.len() - len];
+            let info = Info::new(1288, 1288, 10000);
+            match find_min_cost(info.right_id, search_nodes, matrix) {
+                Some((index, min_cost)) => {
+                    column.push(Node::new(
+                        info.left_id,
+                        min_cost + info.cost as i32,
+                        len as u8,
+                        index as u8,
+                    ));
+                }
+                None => (),
+            }
+        }
         nodes.push(column);
     }
     debug_assert_eq!(nodes.len(), sentence.len() + 1);
