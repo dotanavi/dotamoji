@@ -36,4 +36,5 @@ build trans array
 build trie_a
 build trie_b
 build hash
-build array
+build array_a
+build array_b

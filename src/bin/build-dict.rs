@@ -39,7 +39,8 @@ fn main() {
         .expect("ファイルが指定されていません。");
 
     match dictype.as_str() {
-        "array" => build::<DoubleArrayDict>(&file),
+        "array" | "array_a" => build::<DoubleArrayDict>(&file),
+        "array_b" => build::<DoubleArrayDictB>(&file),
         "hash" => build::<RecHashDict>(&file),
         "trie" | "trie_a" => build::<TrieDictA>(&file),
         "trie_b" => build::<TrieDictB>(&file),

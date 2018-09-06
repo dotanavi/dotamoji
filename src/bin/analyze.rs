@@ -50,6 +50,7 @@ fn main() {
 
     match dictype.as_str() {
         "array" => analyze::<DoubleArrayDict>(&dic_file, &mat_file),
+        "array_b" => analyze::<DoubleArrayDict>(&dic_file, &mat_file),
         "hash" => analyze::<RecHashDict>(&dic_file, &mat_file),
         "trie" | "trie_a" => analyze::<TrieDictA>(&dic_file, &mat_file),
         "trie_b" => analyze::<TrieDictB>(&dic_file, &mat_file),
