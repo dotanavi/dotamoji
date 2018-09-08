@@ -86,7 +86,7 @@ impl<K: Copy + Ord, V> Node<K, V> {
 
 #[derive(Serialize, Deserialize)]
 pub struct Trie<K, V> {
-    root: Node<K, V>,
+    pub root: Node<K, V>,
 }
 
 impl<K, V> Trie<K, V> {

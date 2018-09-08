@@ -55,7 +55,15 @@ where
     }
 }
 
-pub trait NewDictionary<K>: PrefixMap<K, Info> + Default + Serialize + DeserializeOwned {
+pub trait NewDictionary<K>: PrefixMap<K, Info> + Default {
+    fn load_from_file(file: &str) -> Self;
+    fn save_to_file(self, file: &str) -> Self;
+}
+
+impl<K, D> NewDictionary<K> for D
+where
+    D: PrefixMap<K, Info> + Default + Serialize + DeserializeOwned,
+{
     fn load_from_file(file: &str) -> Self {
         let file = File::open(file).expect("ファイルが開けません");
         let file = BufReader::new(file);
@@ -69,7 +77,3 @@ pub trait NewDictionary<K>: PrefixMap<K, Info> + Default + Serialize + Deseriali
         self
     }
 }
-
-impl<K, D> NewDictionary<K> for D where
-    D: PrefixMap<K, Info> + Default + Serialize + DeserializeOwned
-{}
