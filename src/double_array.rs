@@ -80,7 +80,7 @@ impl<T> DoubleArray<T> {
     }
 
     #[inline]
-    fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: impl AsChars<u16>, mut f: F) {
+    fn each_prefix<F: FnMut(usize, &[T])>(&self, key: impl AsChars<u16>, mut f: F) {
         let mut current_ix = 1;
         for (ix, ch) in key.as_chars().enumerate() {
             if let (Index::Transit, next_ix) = self.next_index(current_ix, ch) {
@@ -299,7 +299,7 @@ impl<V> PrefixMap<u16, V> for DoubleArray<V> {
 
     #[inline]
     fn each_prefix<T: AsChars<u16>, F: FnMut(usize, &[V])>(&self, key: T, f: F) {
-        self.each_prefix16(key, f)
+        self.each_prefix(key, f)
     }
 }
 
