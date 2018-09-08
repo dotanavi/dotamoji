@@ -49,10 +49,15 @@ impl SearchCache for BitCache {
         }
 
         let b = ix % NUM_BITS;
-        for b in b..NUM_BITS {
-            if (data[a] & (1 << b)) == 0 {
-                return a * NUM_BITS + b - ch;
-            }
+        // for b in b..NUM_BITS {
+        //     if (data[a] & (1 << b)) == 0 {
+        //         return a * NUM_BITS + b - ch;
+        //     }
+        // }
+        let masked = data[a] | ((1 << b) - 1);
+        if masked != !0 {
+            let b = Bits::trailing_zeros(!masked) as usize;
+            return a * NUM_BITS + b - ch;
         }
 
         let mut a = a + 1;
