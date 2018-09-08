@@ -15,7 +15,7 @@ use trie::{Node, Trie};
 type K = u16;
 
 pub enum Trans<V> {
-    Array(Box<DoubleArray<V>>),
+    Array(Box<DoubleArray<K, V>>),
     Trie(Box<Trie<K, V>>),
 }
 
@@ -79,7 +79,7 @@ impl NewDictionary<K> for Trans<Info> {
         Trans::Array(array)
     }
 }
-pub fn transform<V>(trie: Trie<K, V>) -> DoubleArray<V> {
+pub fn transform<V>(trie: Trie<K, V>) -> DoubleArray<K, V> {
     // show_stats(&trie.root);
 
     let mut base = vec![0, 0];

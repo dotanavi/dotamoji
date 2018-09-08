@@ -36,7 +36,7 @@ fn main() {
         .expect("ファイルが指定されていません。");
 
     match dictype.as_str() {
-        "array16" => test_all::<u16, DoubleArray<Info>>(&file),
+        "array16" => test_all::<u16, DoubleArray<u16, Info>>(&file),
         "hash8" => test_all::<u8, RecursiveHashMap<u8, Info>>(&file),
         "hash16" => test_all::<u16, RecursiveHashMap<u16, Info>>(&file),
         "hash32" => test_all::<char, RecursiveHashMap<char, Info>>(&file),

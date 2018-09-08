@@ -1,3 +1,4 @@
+use std::marker::PhantomData;
 use as_chars::AsChars;
 use prefix_map::PrefixMap;
 use std::{
@@ -17,25 +18,27 @@ enum Index {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct DoubleArray<T> {
+pub struct DoubleArray<K, V> {
     base: Vec<u32>,
     check: Vec<u32>,
-    data: Vec<Vec<T>>,
+    data: Vec<Vec<V>>,
+    phantom: PhantomData<K>,
 }
 
-impl<T> DoubleArray<T> {
+impl<K, V> DoubleArray<K, V> {
     #[inline]
     pub fn new() -> Self {
         DoubleArray {
             base: vec![0, 0],
             check: vec![0, 0],
             data: vec![vec![], vec![]],
+            phantom: PhantomData,
         }
     }
 
     #[inline]
-    pub fn from_raw_parts(base: Vec<u32>, check: Vec<u32>, data: Vec<Vec<T>>) -> Self {
-        Self { base, check, data }
+    pub fn from_raw_parts(base: Vec<u32>, check: Vec<u32>, data: Vec<Vec<V>>) -> Self {
+        Self { base, check, data, phantom: PhantomData }
     }
 
     #[inline]
@@ -43,7 +46,7 @@ impl<T> DoubleArray<T> {
         self.data.iter().map(|v| v.len()).sum()
     }
 
-    pub fn get(&self, key: impl AsChars<u16>) -> Option<&[T]> {
+    pub fn get(&self, key: impl AsChars<u16>) -> Option<&[V]> {
         let mut current_ix = 1;
         for ch in key.as_chars() {
             if let (Index::Transit, next_ix) = self.next_index(current_ix, ch) {
@@ -61,26 +64,7 @@ impl<T> DoubleArray<T> {
     }
 
     #[inline]
-    pub fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, mut f: F) {
-        let mut chars: Vec<u16> = vec![];
-        let mut current_ix = 1;
-        for ch in key.encode_utf16() {
-            chars.push(ch);
-            if let (Index::Transit, next_ix) = self.next_index(current_ix, ch) {
-                current_ix = next_ix;
-                if let Some(v) = self.data.get(current_ix) {
-                    if v.len() > 0 {
-                        f(&chars, &v[..]);
-                    }
-                }
-            } else {
-                return;
-            }
-        }
-    }
-
-    #[inline]
-    fn each_prefix<F: FnMut(usize, &[T])>(&self, key: impl AsChars<u16>, mut f: F) {
+    fn each_prefix<F: FnMut(usize, &[V])>(&self, key: impl AsChars<u16>, mut f: F) {
         let mut current_ix = 1;
         for (ix, ch) in key.as_chars().enumerate() {
             if let (Index::Transit, next_ix) = self.next_index(current_ix, ch) {
@@ -117,7 +101,7 @@ impl<T> DoubleArray<T> {
         }
     }
 
-    pub fn insert(&mut self, key: impl AsChars<u16>, value: T) {
+    pub fn insert(&mut self, key: impl AsChars<u16>, value: V) {
         let mut current_ix = 1;
         for ch in key.as_chars() {
             let (state, next_ix) = self.next_index(current_ix, ch);
@@ -255,7 +239,7 @@ impl<T> DoubleArray<T> {
     }
 }
 
-impl<T: Debug> DoubleArray<T> {
+impl<K, V: Debug> DoubleArray<K, V> {
     pub fn show_debug(&self) {
         for i in 0..self.check.len() {
             if self.base[i] == 0 {
@@ -274,14 +258,14 @@ impl<T: Debug> DoubleArray<T> {
     }
 }
 
-impl<V> Default for DoubleArray<V> {
+impl<K, V> Default for DoubleArray<K, V> {
     #[inline]
     fn default() -> Self {
         DoubleArray::new()
     }
 }
 
-impl<V> PrefixMap<u16, V> for DoubleArray<V> {
+impl<V> PrefixMap<u16, V> for DoubleArray<u16, V> {
     #[inline]
     fn count(&self) -> usize {
         self.count()

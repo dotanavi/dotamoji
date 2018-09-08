@@ -54,7 +54,7 @@ fn main() {
         .expect("コスト行列ファイルが指定されていません。");
 
     match dictype.as_str() {
-        "array16" => analyze::<u16, DoubleArray<Info>>(&dic_file, &mat_file),
+        "array16" => analyze::<u16, DoubleArray<u16, Info>>(&dic_file, &mat_file),
         "hash8" => analyze::<u8, RecursiveHashMap<u8, Info>>(&dic_file, &mat_file),
         "hash16" => analyze::<u16, RecursiveHashMap<u16, Info>>(&dic_file, &mat_file),
         "hash32" => analyze::<char, RecursiveHashMap<char, Info>>(&dic_file, &mat_file),
