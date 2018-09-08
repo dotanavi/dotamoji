@@ -41,3 +41,4 @@ analyze trie8
 analyze trie16
 analyze hash
 analyze trans array
+analyze trans16 array16

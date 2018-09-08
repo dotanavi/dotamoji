@@ -33,10 +33,10 @@ mkdir -p "$save_dir"
 )
 
 build trans array
+build trans16 array16
 build trie_a
 build trie_b
 build trie8
 build trie16
 build hash
 build array
-# build array_b

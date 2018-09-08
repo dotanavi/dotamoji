@@ -53,6 +53,7 @@ fn main() {
 
     match dictype.as_str() {
         "array" => test_all::<DoubleArrayDict>(&file),
+        "array16" => test_all_2::<u16, DoubleArrayDict>(&file),
         "hash" => test_all_2::<u16, RecHashDict>(&file),
         "trie" | "trie_a" => test_all::<TrieDictA>(&file),
         "trie8" => test_all_2::<u8, Trie2<u8, Info>>(&file),
