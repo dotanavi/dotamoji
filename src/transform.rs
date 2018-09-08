@@ -1,14 +1,15 @@
-use std::fs::File;
-use std::io::BufWriter;
-use std::mem::swap;
+use as_chars::AsChars;
 use as_chars::AsUsize;
 use bincode;
-use as_chars::AsChars;
 use dictionary::NewDictionary;
 use double_array::DoubleArray;
 use info::Info;
 use prefix_map::PrefixMap;
 use search_cache::*;
+use std::fs::File;
+use std::io::BufWriter;
+use std::mem::swap;
+use std::time::Instant;
 use trie::{Node, Trie};
 
 pub enum Trans<K, V> {
@@ -87,11 +88,14 @@ pub fn transform<K: AsUsize, V>(trie: Trie<K, V>) -> DoubleArray<K, V> {
     // let mut cache = NoCache::new(2);
     // let mut cache = DoubleCheck::<BitCache, NoCache>::new(2);
     // let mut cache = BoolCache::new(2);
-    let mut cache = BitCache::new(2);
+    // let mut cache = BitCache::new(2);
+    let mut cache = BitCache0::new(2);
     // let mut cache = LinkCache::new(2);
     // let mut cache = DoubleCheck::<BitCache, NoCache>::new(2);
 
+    let start = Instant::now();
     put_rec(trie.root, 1, &mut base, &mut check, &mut data, &mut cache);
+    eprintln!("transform: {:?}", start.elapsed());
     return DoubleArray::from_raw_parts(base, check, data);
 }
 
@@ -140,7 +144,14 @@ fn put_rec<K: AsUsize, V, C: SearchCache>(
         check[index] = base_index as u32;
     }
     for (ch, child_node) in node.children {
-        put_rec(child_node, new_base + ch.as_usize(), base, check, data, cache);
+        put_rec(
+            child_node,
+            new_base + ch.as_usize(),
+            base,
+            check,
+            data,
+            cache,
+        );
     }
 }
 
