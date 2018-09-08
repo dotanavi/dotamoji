@@ -1,11 +1,12 @@
 use as_chars::AsChars;
 use prefix_map::PrefixMap;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Node<K, V> {
     pub data: Vec<V>,
     pub children: Vec<(K, Node<K, V>)>,
 }
+
 impl<K: Copy + Ord, V> Node<K, V> {
     #[inline]
     fn new() -> Self {
@@ -13,6 +14,15 @@ impl<K: Copy + Ord, V> Node<K, V> {
             children: vec![],
             data: vec![],
         }
+    }
+
+    #[inline]
+    fn count(&self) -> usize {
+        let mut sum = self.data.len();
+        for (_, ch) in &self.children {
+            sum += ch.count();
+        }
+        return sum;
     }
 
     #[inline]
@@ -72,14 +82,22 @@ impl<K: Copy + Ord, V> Node<K, V> {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Trie<K, V> {
     root: Node<K, V>,
 }
 
+impl<K: Copy + Ord, V> Trie<K, V> {
+    #[inline]
+    pub fn new() -> Self {
+        Self { root: Node::new() }
+    }
+}
+
 impl<K: Copy + Ord, V> PrefixMap<K, V> for Trie<K, V> {
     #[inline]
-    fn new() -> Self {
-        Trie { root: Node::new() }
+    fn count(&self) -> usize {
+        self.root.count()
     }
 
     #[inline]

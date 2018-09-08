@@ -22,7 +22,7 @@ impl Info {
     }
 }
 
-pub trait PrefixMap<T> {
+pub trait PrefixMapOld<T> {
     fn new() -> Self;
     fn count(&self) -> usize;
     fn get(&self, key: impl AsChars<u16>) -> Option<&[T]>;
@@ -31,14 +31,14 @@ pub trait PrefixMap<T> {
     fn insert(&mut self, key: impl AsChars<u16>, value: T);
 }
 
-pub trait Dictionary: PrefixMap<Info> {
+pub trait Dictionary: PrefixMapOld<Info> {
     fn load_from_file(file: &str) -> Self;
 
     fn save_to_file(self, file: &str) -> Self;
 }
 impl<D> Dictionary for D
 where
-    D: PrefixMap<Info> + Serialize + DeserializeOwned,
+    D: PrefixMapOld<Info> + Serialize + DeserializeOwned,
 {
     fn load_from_file(file: &str) -> Self {
         let file = File::open(file).expect("ファイルが開けません");

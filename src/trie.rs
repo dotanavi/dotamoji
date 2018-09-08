@@ -1,4 +1,4 @@
-use super::PrefixMap;
+use super::PrefixMapOld;
 use as_chars::AsChars;
 
 pub trait Node<T> {
@@ -172,7 +172,7 @@ pub struct Trie<N> {
     pub(crate) root: N,
 }
 
-impl<T, N: Node<T>> PrefixMap<T> for Trie<N> {
+impl<T, N: Node<T>> PrefixMapOld<T> for Trie<N> {
     #[inline]
     fn new() -> Self {
         Trie { root: Node::new() }

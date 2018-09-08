@@ -82,7 +82,7 @@ fn find_min_cost(src_id: u16, nodes: &[Node], matrix: &Matrix) -> Option<(usize,
 }
 
 #[inline]
-pub fn analyze<D: PrefixMap<Info>>(
+pub fn analyze<D: PrefixMapOld<Info>>(
     sentence: &str,
     dic: &D,
     matrix: &Matrix,

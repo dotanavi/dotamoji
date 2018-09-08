@@ -5,7 +5,7 @@ use std::mem::swap;
 use bincode;
 
 use as_chars::AsChars;
-use dictionary::{Dictionary, Info, PrefixMap};
+use dictionary::{Dictionary, Info, PrefixMapOld};
 use double_array::DoubleArray;
 use search_cache::*;
 use trie::{NodeA, Trie};
@@ -15,7 +15,7 @@ pub enum Trans<T> {
     Trie(Box<Trie<NodeA<T>>>),
 }
 
-impl<T> PrefixMap<T> for Trans<T> {
+impl<T> PrefixMapOld<T> for Trans<T> {
     #[inline]
     fn new() -> Self {
         Trans::Trie(Box::new(Trie::new()))

@@ -1,6 +1,6 @@
 use fnv::FnvHashMap as HashMap;
 // use std::collections::HashMap;
-use super::PrefixMap;
+use super::PrefixMapOld;
 use as_chars::AsChars;
 
 #[derive(Serialize, Deserialize)]
@@ -10,7 +10,7 @@ pub struct RecursiveHashMap<T> {
     data: HashMap<u32, Vec<T>>,
 }
 
-impl<T> PrefixMap<T> for RecursiveHashMap<T> {
+impl<T> PrefixMapOld<T> for RecursiveHashMap<T> {
     #[inline]
     fn new() -> Self {
         Self {

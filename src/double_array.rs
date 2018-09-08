@@ -1,4 +1,4 @@
-use super::PrefixMap;
+use super::PrefixMapOld;
 use as_chars::AsChars;
 use std::{
     char,
@@ -274,7 +274,7 @@ impl<T: Debug> DoubleArray<T> {
     }
 }
 
-impl<T> PrefixMap<T> for DoubleArray<T> {
+impl<T> PrefixMapOld<T> for DoubleArray<T> {
     #[inline]
     fn new() -> Self {
         DoubleArray::new()
