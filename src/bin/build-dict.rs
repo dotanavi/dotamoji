@@ -61,7 +61,7 @@ fn main() {
     match dictype.as_str() {
         "array" | "array_a" => build::<DoubleArrayDict>(&file),
         "array_b" => build::<DoubleArrayDictB>(&file),
-        "hash" => build::<RecHashDict>(&file),
+        "hash" => build_2::<u16, RecHashDict>(&file),
         "trie" | "trie_a" => build::<TrieDictA>(&file),
         "trie_b" => build::<TrieDictB>(&file),
         "trie8" => build_2::<u8, Trie2<u8, Info>>(&file),

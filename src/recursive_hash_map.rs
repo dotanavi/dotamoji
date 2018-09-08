@@ -1,7 +1,7 @@
 use fnv::FnvHashMap as HashMap;
 // use std::collections::HashMap;
-use super::PrefixMapOld;
 use as_chars::AsChars;
+use prefix_map::PrefixMap;
 
 #[derive(Serialize, Deserialize)]
 pub struct RecursiveHashMap<T> {
@@ -10,22 +10,31 @@ pub struct RecursiveHashMap<T> {
     data: HashMap<u32, Vec<T>>,
 }
 
-impl<T> PrefixMapOld<T> for RecursiveHashMap<T> {
+impl<V> RecursiveHashMap<V> {
     #[inline]
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             id: 0,
             link: Default::default(),
             data: Default::default(),
         }
     }
+}
 
+impl <V> Default for RecursiveHashMap<V> {
+    fn default() -> Self {
+        RecursiveHashMap::new()
+    }
+}
+
+impl<V> PrefixMap<u16, V> for RecursiveHashMap<V> {
     #[inline]
     fn count(&self) -> usize {
         self.data.values().map(|v| v.len()).sum()
     }
 
-    fn get(&self, key: impl AsChars<u16>) -> Option<&[T]> {
+    #[inline]
+    fn get<T: AsChars<u16>>(&self, key: T) -> Option<&[V]> {
         let mut current_id = 0;
         for ch in key.as_chars() {
             match self.link.get(&(current_id, ch)) {
@@ -40,40 +49,7 @@ impl<T> PrefixMapOld<T> for RecursiveHashMap<T> {
     }
 
     #[inline]
-    fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, mut f: F) {
-        let mut chars: Vec<u16> = vec![];
-        let mut current_id = 0;
-        for ch in key.encode_utf16() {
-            match self.link.get(&(current_id, ch)) {
-                None => return,
-                Some(next_id) => {
-                    chars.push(ch);
-                    if let Some(vec) = self.data.get(next_id) {
-                        f(&chars, &vec[..]);
-                    }
-                    current_id = *next_id;
-                }
-            }
-        }
-    }
-
-    #[inline]
-    fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], mut f: F) {
-        let mut current_id = 0;
-        for (ix, ch) in key.iter().enumerate() {
-            match self.link.get(&(current_id, *ch)) {
-                None => return,
-                Some(next_id) => {
-                    if let Some(vec) = self.data.get(next_id) {
-                        f(ix + 1, &vec[..]);
-                    }
-                    current_id = *next_id;
-                }
-            }
-        }
-    }
-
-    fn insert(&mut self, key: impl AsChars<u16>, value: T) {
+    fn insert<T: AsChars<u16>>(&mut self, key: T, value: V) {
         let id = &mut self.id;
         let link = &mut self.link;
         let data = &mut self.data;
@@ -89,6 +65,22 @@ impl<T> PrefixMapOld<T> for RecursiveHashMap<T> {
         }
         let vec = data.entry(current_id).or_insert_with(Default::default);
         vec.push(value);
+    }
+
+    #[inline]
+    fn each_prefix<T: AsChars<u16>, F: FnMut(usize, &[V])>(&self, key: T, mut f: F) {
+        let mut current_id = 0;
+        for (ix, ch) in key.as_chars().enumerate() {
+            match self.link.get(&(current_id, ch)) {
+                None => return,
+                Some(next_id) => {
+                    if let Some(vec) = self.data.get(next_id) {
+                        f(ix + 1, &vec[..]);
+                    }
+                    current_id = *next_id;
+                }
+            }
+        }
     }
 }
 
@@ -191,12 +183,12 @@ mod tests {
         pt.insert("a", 5);
 
         let mut vec = vec![];
-        pt.each_prefix("abcd", |chars, data| {
-            vec.push((String::from_utf16_lossy(chars), data.to_owned()));
+        pt.each_prefix("abcd", |len, data| {
+            vec.push((len, data.to_owned()));
         });
         assert_eq!(
             vec,
-            vec![("a".to_string(), vec![4, 5]), ("abc".to_string(), vec![1])]
+            vec![(1, vec![4, 5]), (3, vec![1])]
         );
     }
 }
