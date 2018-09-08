@@ -54,8 +54,8 @@ fn main() {
         .expect("コスト行列ファイルが指定されていません。");
 
     match dictype.as_str() {
-        "array16" => analyze::<u16, DoubleArrayDict>(&dic_file, &mat_file),
-        "hash" => analyze::<u16, RecHashDict>(&dic_file, &mat_file),
+        "array16" => analyze::<u16, DoubleArray<Info>>(&dic_file, &mat_file),
+        "hash16" => analyze::<u16, RecursiveHashMap<Info>>(&dic_file, &mat_file),
         "trie8" => analyze::<u8, Trie<u8, Info>>(&dic_file, &mat_file),
         "trie16" => analyze::<u16, Trie<u16, Info>>(&dic_file, &mat_file),
         _ => panic!("不明なタイプです。"),

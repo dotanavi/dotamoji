@@ -5,7 +5,7 @@ use std::mem::swap;
 use bincode;
 
 use as_chars::AsChars;
-use dictionary::Info;
+use info::Info;
 use dictionary::NewDictionary;
 use double_array::DoubleArray;
 use prefix_map::PrefixMap;

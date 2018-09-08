@@ -48,8 +48,8 @@ fn main() {
         .expect("ファイルが指定されていません。");
 
     match dictype.as_str() {
-        "array16" => build::<u16, DoubleArrayDict>(&file),
-        "hash" => build::<u16, RecHashDict>(&file),
+        "array16" => build::<u16, DoubleArray<Info>>(&file),
+        "hash16" => build::<u16, RecursiveHashMap<Info>>(&file),
         "trie8" => build::<u8, Trie<u8, Info>>(&file),
         "trie16" => build::<u16, Trie<u16, Info>>(&file),
         "trans16" => build::<u16, Trans<Info>>(&file),

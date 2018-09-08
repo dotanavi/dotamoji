@@ -32,11 +32,8 @@ mkdir -p "$save_dir"
   cargo build --release
 )
 
-build trans array
 build trans16 array16
-build trie_a
-build trie_b
 build trie8
 build trie16
-build hash
-build array
+build hash16
+build array16

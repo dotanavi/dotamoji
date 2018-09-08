@@ -14,16 +14,15 @@ mod recursive_hash_map;
 mod search_cache;
 mod transform;
 mod trie;
+mod info;
 
 pub use analyze::analyze;
 pub use as_chars::{AsChars, IntoString};
-pub use dictionary::*;
+pub use dictionary::NewDictionary;
+pub use info::Info;
 pub use double_array::DoubleArray;
 pub use matrix::Matrix;
 pub use prefix_map::PrefixMap;
 pub use recursive_hash_map::RecursiveHashMap;
 pub use transform::Trans;
 pub use trie::Trie;
-
-pub type DoubleArrayDict = DoubleArray<Info>;
-pub type RecHashDict = RecursiveHashMap<Info>;
