@@ -52,8 +52,7 @@ fn main() {
         .expect("ファイルが指定されていません。");
 
     match dictype.as_str() {
-        "array" | "array_a" => test_all::<DoubleArrayDict>(&file),
-        "array_b" => test_all::<DoubleArrayDictB>(&file),
+        "array" => test_all::<DoubleArrayDict>(&file),
         "hash" => test_all_2::<u16, RecHashDict>(&file),
         "trie" | "trie_a" => test_all::<TrieDictA>(&file),
         "trie8" => test_all_2::<u8, Trie2<u8, Info>>(&file),
