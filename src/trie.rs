@@ -1,4 +1,5 @@
-use super::{AsUtf16, PrefixMap};
+use super::PrefixMap;
+use as_chars::AsChars;
 
 pub trait Node<T> {
     fn new() -> Self;
@@ -183,8 +184,8 @@ impl<T, N: Node<T>> PrefixMap<T> for Trie<N> {
     }
 
     #[inline]
-    fn get(&self, key: impl AsUtf16) -> Option<&[T]> {
-        self.root.dig_get(key.as_utf16())
+    fn get(&self, key: impl AsChars<u16>) -> Option<&[T]> {
+        self.root.dig_get(key.as_chars())
     }
 
     #[allow(unused_variables)]
@@ -194,11 +195,11 @@ impl<T, N: Node<T>> PrefixMap<T> for Trie<N> {
 
     #[allow(unused_variables)]
     fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], f: F) {
-        self.root.dig_yield(0, key.as_utf16(), f);
+        self.root.dig_yield(0, key.as_chars(), f);
     }
 
     #[inline]
-    fn insert(&mut self, key: impl AsUtf16, value: T) {
-        self.root.dig_set(key.as_utf16(), value);
+    fn insert(&mut self, key: impl AsChars<u16>, value: T) {
+        self.root.dig_set(key.as_chars(), value);
     }
 }

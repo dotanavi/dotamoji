@@ -1,6 +1,7 @@
 use fnv::FnvHashMap as HashMap;
 // use std::collections::HashMap;
-use super::{AsUtf16, PrefixMap};
+use super::PrefixMap;
+use as_chars::AsChars;
 
 #[derive(Serialize, Deserialize)]
 pub struct RecursiveHashMap<T> {
@@ -24,9 +25,9 @@ impl<T> PrefixMap<T> for RecursiveHashMap<T> {
         self.data.values().map(|v| v.len()).sum()
     }
 
-    fn get(&self, key: impl AsUtf16) -> Option<&[T]> {
+    fn get(&self, key: impl AsChars<u16>) -> Option<&[T]> {
         let mut current_id = 0;
-        for ch in key.as_utf16() {
+        for ch in key.as_chars() {
             match self.link.get(&(current_id, ch)) {
                 Some(next_id) => current_id = *next_id,
                 None => return None,
@@ -72,13 +73,13 @@ impl<T> PrefixMap<T> for RecursiveHashMap<T> {
         }
     }
 
-    fn insert(&mut self, key: impl AsUtf16, value: T) {
+    fn insert(&mut self, key: impl AsChars<u16>, value: T) {
         let id = &mut self.id;
         let link = &mut self.link;
         let data = &mut self.data;
 
         let mut current_id = 0;
-        for ch in key.as_utf16() {
+        for ch in key.as_chars() {
             let entry = link.entry((current_id, ch));
             let next_id = entry.or_insert_with(|| {
                 *id += 1;

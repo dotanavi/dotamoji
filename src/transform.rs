@@ -4,7 +4,7 @@ use std::mem::swap;
 
 use bincode;
 
-use super::AsUtf16;
+use as_chars::AsChars;
 use dictionary::{Dictionary, Info, PrefixMap};
 use double_array::DoubleArray;
 use search_cache::*;
@@ -30,7 +30,7 @@ impl<T> PrefixMap<T> for Trans<T> {
     }
 
     #[inline]
-    fn get(&self, key: impl AsUtf16) -> Option<&[T]> {
+    fn get(&self, key: impl AsChars<u16>) -> Option<&[T]> {
         match self {
             Trans::Array(ref x) => x.get(key),
             Trans::Trie(ref x) => x.get(key),
@@ -38,7 +38,7 @@ impl<T> PrefixMap<T> for Trans<T> {
     }
 
     #[inline]
-    fn insert(&mut self, key: impl AsUtf16, value: T) {
+    fn insert(&mut self, key: impl AsChars<u16>, value: T) {
         match self {
             Trans::Array(ref mut x) => x.insert(key, value),
             Trans::Trie(ref mut x) => x.insert(key, value),

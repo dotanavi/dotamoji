@@ -5,7 +5,7 @@ extern crate fnv;
 extern crate serde;
 
 mod analyze;
-mod as_utf16;
+mod as_chars;
 mod dictionary;
 mod double_array;
 mod double_array_b;
@@ -18,12 +18,12 @@ mod trie;
 mod trie2;
 
 pub use analyze::analyze;
-pub use as_utf16::AsUtf16;
+pub use as_chars::AsChars;
 pub use dictionary::*;
 pub use double_array::DoubleArray;
 pub use double_array_b::DoubleArray as DoubleArrayB;
 pub use matrix::Matrix;
-pub use prefix_map::{AsChars, PrefixMap as PrefixMap2};
+pub use prefix_map::PrefixMap as PrefixMap2;
 pub use recursive_hash_map::RecursiveHashMap;
 pub use transform::Trans;
 pub use trie::Trie;

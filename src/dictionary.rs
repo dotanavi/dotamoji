@@ -1,10 +1,9 @@
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
 
+use as_chars::AsChars;
 use bincode;
 use serde::{de::DeserializeOwned, Serialize};
-
-use super::AsUtf16;
 
 #[derive(Copy, Clone, Serialize, Deserialize)]
 pub struct Info {
@@ -26,10 +25,10 @@ impl Info {
 pub trait PrefixMap<T> {
     fn new() -> Self;
     fn count(&self) -> usize;
-    fn get(&self, key: impl AsUtf16) -> Option<&[T]>;
+    fn get(&self, key: impl AsChars<u16>) -> Option<&[T]>;
     fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, f: F);
     fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], f: F);
-    fn insert(&mut self, key: impl AsUtf16, value: T);
+    fn insert(&mut self, key: impl AsChars<u16>, value: T);
 }
 
 pub trait Dictionary: PrefixMap<Info> {

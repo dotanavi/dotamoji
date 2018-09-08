@@ -1,4 +1,5 @@
-use super::{AsUtf16, PrefixMap};
+use super::PrefixMap;
+use as_chars::AsChars;
 use std::{
     char,
     cmp::{max, min},
@@ -52,9 +53,9 @@ impl<T> DoubleArray<T> {
         self.data.iter().map(|v| v.len()).sum()
     }
 
-    pub fn get(&self, key: impl AsUtf16) -> Option<&[T]> {
+    pub fn get(&self, key: impl AsChars<u16>) -> Option<&[T]> {
         let mut current_ix = 1;
-        for ch in key.as_utf16() {
+        for ch in key.as_chars() {
             if let (Index::Transit, next_ix) = self.next_index(current_ix, ch) {
                 current_ix = next_ix;
             } else {
@@ -126,9 +127,9 @@ impl<T> DoubleArray<T> {
         }
     }
 
-    pub fn insert(&mut self, key: impl AsUtf16, value: T) {
+    pub fn insert(&mut self, key: impl AsChars<u16>, value: T) {
         let mut current_ix = 1;
-        for ch in key.as_utf16() {
+        for ch in key.as_chars() {
             let (state, next_ix) = self.next_index(current_ix, ch);
             current_ix = match state {
                 Index::Transit => next_ix,
@@ -293,7 +294,7 @@ impl<T> PrefixMap<T> for DoubleArray<T> {
         self.count()
     }
     #[inline]
-    fn get(&self, key: impl AsUtf16) -> Option<&[T]> {
+    fn get(&self, key: impl AsChars<u16>) -> Option<&[T]> {
         self.get(key)
     }
     #[inline]
@@ -305,7 +306,7 @@ impl<T> PrefixMap<T> for DoubleArray<T> {
         self.each_prefix16(key, f)
     }
     #[inline]
-    fn insert(&mut self, key: impl AsUtf16, value: T) {
+    fn insert(&mut self, key: impl AsChars<u16>, value: T) {
         self.insert(key, value)
     }
 }
