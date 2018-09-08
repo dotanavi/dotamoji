@@ -39,8 +39,10 @@ fn main() {
         "array16" => test_all::<u16, DoubleArray<Info>>(&file),
         "hash8" => test_all::<u8, RecursiveHashMap<u8, Info>>(&file),
         "hash16" => test_all::<u16, RecursiveHashMap<u16, Info>>(&file),
+        "hash32" => test_all::<char, RecursiveHashMap<char, Info>>(&file),
         "trie8" => test_all::<u8, Trie<u8, Info>>(&file),
         "trie16" => test_all::<u16, Trie<u16, Info>>(&file),
+        "trie32" => test_all::<char, Trie<char, Info>>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }

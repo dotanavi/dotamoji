@@ -51,8 +51,10 @@ fn main() {
         "array16" => build::<u16, DoubleArray<Info>>(&file),
         "hash8" => build::<u8, RecursiveHashMap<u8, Info>>(&file),
         "hash16" => build::<u16, RecursiveHashMap<u16, Info>>(&file),
+        "hash32" => build::<char, RecursiveHashMap<char, Info>>(&file),
         "trie8" => build::<u8, Trie<u8, Info>>(&file),
         "trie16" => build::<u16, Trie<u16, Info>>(&file),
+        "trie32" => build::<char, Trie<char, Info>>(&file),
         "trans16" => build::<u16, Trans<Info>>(&file),
         _ => panic!("不明なタイプです。"),
     }

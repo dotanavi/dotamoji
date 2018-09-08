@@ -2,9 +2,9 @@ use std::fs::File;
 use std::io::{BufReader, BufWriter};
 
 use bincode;
+use info::Info;
 use prefix_map::PrefixMap;
 use serde::{de::DeserializeOwned, Serialize};
-use info::Info;
 
 pub trait NewDictionary<K>: PrefixMap<K, Info> + Default {
     fn load_from_file(file: &str) -> Self;

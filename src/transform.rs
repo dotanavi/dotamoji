@@ -5,9 +5,9 @@ use std::mem::swap;
 use bincode;
 
 use as_chars::AsChars;
-use info::Info;
 use dictionary::NewDictionary;
 use double_array::DoubleArray;
+use info::Info;
 use prefix_map::PrefixMap;
 use search_cache::*;
 use trie::{Node, Trie};

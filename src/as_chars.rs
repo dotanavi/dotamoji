@@ -1,10 +1,20 @@
 use std::iter::Cloned;
+use std::iter::FromIterator;
 use std::slice::Iter;
-use std::str::{self, EncodeUtf16};
+use std::str::{self, Chars, EncodeUtf16};
 
 pub trait AsChars<T> {
     type I: Iterator<Item = T>;
     fn as_chars(&self) -> Self::I;
+}
+
+impl<'a> AsChars<u8> for &'a str {
+    type I = Cloned<Iter<'a, u8>>;
+
+    #[inline]
+    fn as_chars(&self) -> Self::I {
+        self.as_bytes().iter().cloned()
+    }
 }
 
 impl<'a> AsChars<u16> for &'a str {
@@ -16,12 +26,12 @@ impl<'a> AsChars<u16> for &'a str {
     }
 }
 
-impl<'a> AsChars<u8> for &'a str {
-    type I = Cloned<Iter<'a, u8>>;
+impl<'a> AsChars<char> for &'a str {
+    type I = Chars<'a>;
 
     #[inline]
     fn as_chars(&self) -> Self::I {
-        self.as_bytes().iter().cloned()
+        self.chars()
     }
 }
 
@@ -49,5 +59,11 @@ impl IntoString for u8 {
 impl IntoString for u16 {
     fn into_string(chars: &[u16]) -> String {
         String::from_utf16_lossy(chars)
+    }
+}
+
+impl IntoString for char {
+    fn into_string(chars: &[char]) -> String {
+        String::from_iter(chars.iter())
     }
 }

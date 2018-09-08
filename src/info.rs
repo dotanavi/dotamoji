@@ -1,4 +1,3 @@
-
 #[derive(Copy, Clone, Serialize, Deserialize)]
 pub struct Info {
     pub left_id: u16,
