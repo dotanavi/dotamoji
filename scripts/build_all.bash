@@ -20,7 +20,7 @@ function build () {
   (
     set -x
     time "$out_dir/build-dict" "$build_type" "$dic_path.tmp" < $dic_file
-    time "$out_dir/test-dict" "$binary_format" "$dic_path.tmp" < $dic_file
+    "$out_dir/test-dict" "$binary_format" "$dic_path.tmp" < $dic_file
     mv "$dic_path.tmp" "$dic_path"
   )
 }
@@ -35,6 +35,8 @@ mkdir -p "$save_dir"
 build trans array
 build trie_a
 build trie_b
+build trie8
+build trie16
 build hash
 build array_a
 build array_b

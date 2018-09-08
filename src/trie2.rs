@@ -7,7 +7,7 @@ pub struct Node<K, V> {
     pub children: Vec<(K, Node<K, V>)>,
 }
 
-impl<K: Copy + Ord, V> Node<K, V> {
+impl<K, V> Node<K, V> {
     #[inline]
     fn new() -> Self {
         Self {
@@ -15,7 +15,9 @@ impl<K: Copy + Ord, V> Node<K, V> {
             data: vec![],
         }
     }
+}
 
+impl<K: Copy + Ord, V> Node<K, V> {
     #[inline]
     fn count(&self) -> usize {
         let mut sum = self.data.len();
@@ -87,10 +89,17 @@ pub struct Trie<K, V> {
     root: Node<K, V>,
 }
 
-impl<K: Copy + Ord, V> Trie<K, V> {
+impl<K, V> Trie<K, V> {
     #[inline]
     pub fn new() -> Self {
         Self { root: Node::new() }
+    }
+}
+
+impl<K, V> Default for Trie<K, V> {
+    #[inline]
+    fn default() -> Self {
+        Self::new()
     }
 }
 
