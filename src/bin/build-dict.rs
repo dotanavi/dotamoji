@@ -66,8 +66,7 @@ fn main() {
         "trie_b" => build::<TrieDictB>(&file),
         "trie8" => build_2::<u8, Trie2<u8, Info>>(&file),
         "trie16" => build_2::<u16, Trie2<u16, Info>>(&file),
-        "trans" => build::<TransDict>(&file),
-        "trans16" => build_2::<u16, Trans2<Info>>(&file),
+        "trans16" => build_2::<u16, Trans<Info>>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }

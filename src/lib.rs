@@ -14,7 +14,6 @@ mod prefix_map;
 mod recursive_hash_map;
 mod search_cache;
 mod transform;
-mod transform2;
 mod trie;
 mod trie2;
 
@@ -27,12 +26,10 @@ pub use matrix::Matrix;
 pub use prefix_map::PrefixMap;
 pub use recursive_hash_map::RecursiveHashMap;
 pub use transform::Trans;
-pub use transform2::Trans as Trans2;
 pub use trie::Trie;
 pub use trie2::Trie as Trie2;
 
 pub type DoubleArrayDict = DoubleArray<Info>;
 pub type RecHashDict = RecursiveHashMap<Info>;
-pub type TransDict = Trans<Info>;
 pub type TrieDictA = Trie<trie::NodeA<Info>>;
 pub type TrieDictB = Trie<trie::NodeB<Info>>;

@@ -5,22 +5,28 @@ use std::mem::swap;
 use bincode;
 
 use as_chars::AsChars;
-use dictionary::{Dictionary, Info, PrefixMapOld};
+use dictionary::Info;
+use dictionary::NewDictionary;
 use double_array::DoubleArray;
+use prefix_map::PrefixMap;
 use search_cache::*;
-use trie::{NodeA, Trie};
+use trie2::{Node, Trie};
 
-pub enum Trans<T> {
-    Array(Box<DoubleArray<T>>),
-    Trie(Box<Trie<NodeA<T>>>),
+type K = u16;
+
+pub enum Trans<V> {
+    Array(Box<DoubleArray<V>>),
+    Trie(Box<Trie<K, V>>),
 }
 
-impl<T> PrefixMapOld<T> for Trans<T> {
+impl<V> Default for Trans<V> {
     #[inline]
-    fn new() -> Self {
+    fn default() -> Self {
         Trans::Trie(Box::new(Trie::new()))
     }
+}
 
+impl<V> PrefixMap<K, V> for Trans<V> {
     #[inline]
     fn count(&self) -> usize {
         match self {
@@ -30,7 +36,7 @@ impl<T> PrefixMapOld<T> for Trans<T> {
     }
 
     #[inline]
-    fn get(&self, key: impl AsChars<u16>) -> Option<&[T]> {
+    fn get<T: AsChars<K>>(&self, key: T) -> Option<&[V]> {
         match self {
             Trans::Array(ref x) => x.get(key),
             Trans::Trie(ref x) => x.get(key),
@@ -38,7 +44,7 @@ impl<T> PrefixMapOld<T> for Trans<T> {
     }
 
     #[inline]
-    fn insert(&mut self, key: impl AsChars<u16>, value: T) {
+    fn insert<T: AsChars<K>>(&mut self, key: T, value: V) {
         match self {
             Trans::Array(ref mut x) => x.insert(key, value),
             Trans::Trie(ref mut x) => x.insert(key, value),
@@ -46,23 +52,17 @@ impl<T> PrefixMapOld<T> for Trans<T> {
     }
 
     #[inline]
-    fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, f: F) {
-        match self {
-            Trans::Array(ref x) => x.each_prefix(key, f),
-            Trans::Trie(ref x) => x.each_prefix(key, f),
-        }
-    }
+    fn each_prefix<T: AsChars<K>, F: FnMut(usize, &[V])>(&self, key: T, f: F) {
+        use std::ops::Deref;
 
-    #[inline]
-    fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], f: F) {
         match self {
-            Trans::Array(ref x) => x.each_prefix16(key, f),
-            Trans::Trie(ref x) => x.each_prefix16(key, f),
+            Trans::Array(ref x) => PrefixMap::each_prefix(x.deref(), key, f),
+            Trans::Trie(ref x) => x.each_prefix(key, f),
         }
     }
 }
 
-impl Dictionary for Trans<Info> {
+impl NewDictionary<K> for Trans<Info> {
     fn load_from_file(_: &str) -> Self {
         panic!("ファイルのロードには対応していません。");
     }
@@ -79,8 +79,7 @@ impl Dictionary for Trans<Info> {
         Trans::Array(array)
     }
 }
-
-pub fn transform<T>(trie: Trie<NodeA<T>>) -> DoubleArray<T> {
+pub fn transform<V>(trie: Trie<K, V>) -> DoubleArray<V> {
     // show_stats(&trie.root);
 
     let mut base = vec![0, 0];
@@ -98,12 +97,12 @@ pub fn transform<T>(trie: Trie<NodeA<T>>) -> DoubleArray<T> {
     return DoubleArray::from_raw_parts(base, check, data);
 }
 
-fn put_rec<T, C: SearchCache>(
-    mut node: NodeA<T>,
+fn put_rec<V, C: SearchCache>(
+    mut node: Node<K, V>,
     base_index: usize,
     base: &mut Vec<u32>,
     check: &mut Vec<u32>,
-    data: &mut Vec<Vec<T>>,
+    data: &mut Vec<Vec<V>>,
     cache: &mut C,
 ) {
     if node.data.len() > 0 {
@@ -148,7 +147,7 @@ fn put_rec<T, C: SearchCache>(
 }
 
 #[allow(unused)]
-fn show_stats<T>(node: &NodeA<T>) {
+fn show_stats<K, V>(node: &Node<K, V>) {
     let mut table = vec![];
     calc_stats_rec(node, &mut table);
 
@@ -159,7 +158,7 @@ fn show_stats<T>(node: &NodeA<T>) {
     }
 }
 
-fn calc_stats_rec<T>(node: &NodeA<T>, table: &mut Vec<u8>) {
+fn calc_stats_rec<K, V>(node: &Node<K, V>, table: &mut Vec<u8>) {
     let len = node.children.len();
     if len >= table.len() {
         table.resize(len + 1, 0);
