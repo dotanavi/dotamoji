@@ -49,7 +49,8 @@ fn main() {
 
     match dictype.as_str() {
         "array16" => build::<u16, DoubleArray<Info>>(&file),
-        "hash16" => build::<u16, RecursiveHashMap<Info>>(&file),
+        "hash8" => build::<u8, RecursiveHashMap<u8, Info>>(&file),
+        "hash16" => build::<u16, RecursiveHashMap<u16, Info>>(&file),
         "trie8" => build::<u8, Trie<u8, Info>>(&file),
         "trie16" => build::<u16, Trie<u16, Info>>(&file),
         "trans16" => build::<u16, Trans<Info>>(&file),

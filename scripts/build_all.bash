@@ -35,5 +35,6 @@ mkdir -p "$save_dir"
 build trans16 array16
 build trie8
 build trie16
+build hash8
 build hash16
 build array16

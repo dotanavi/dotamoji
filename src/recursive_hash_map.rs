@@ -2,15 +2,16 @@ use fnv::FnvHashMap as HashMap;
 // use std::collections::HashMap;
 use as_chars::AsChars;
 use prefix_map::PrefixMap;
+use std::hash::Hash;
 
 #[derive(Serialize, Deserialize)]
-pub struct RecursiveHashMap<T> {
+pub struct RecursiveHashMap<K: Eq + Hash, V> {
     id: u32,
-    link: HashMap<(u32, u16), u32>,
-    data: HashMap<u32, Vec<T>>,
+    link: HashMap<(u32, K), u32>,
+    data: HashMap<u32, Vec<V>>,
 }
 
-impl<V> RecursiveHashMap<V> {
+impl<K: Eq + Hash, V> RecursiveHashMap<K, V> {
     #[inline]
     pub fn new() -> Self {
         Self {
@@ -21,20 +22,20 @@ impl<V> RecursiveHashMap<V> {
     }
 }
 
-impl<V> Default for RecursiveHashMap<V> {
+impl<K: Eq + Hash, V> Default for RecursiveHashMap<K, V> {
     fn default() -> Self {
         RecursiveHashMap::new()
     }
 }
 
-impl<V> PrefixMap<u16, V> for RecursiveHashMap<V> {
+impl<K: Eq + Hash, V> PrefixMap<K, V> for RecursiveHashMap<K, V> {
     #[inline]
     fn count(&self) -> usize {
         self.data.values().map(|v| v.len()).sum()
     }
 
     #[inline]
-    fn get<T: AsChars<u16>>(&self, key: T) -> Option<&[V]> {
+    fn get<T: AsChars<K>>(&self, key: T) -> Option<&[V]> {
         let mut current_id = 0;
         for ch in key.as_chars() {
             match self.link.get(&(current_id, ch)) {
@@ -49,7 +50,7 @@ impl<V> PrefixMap<u16, V> for RecursiveHashMap<V> {
     }
 
     #[inline]
-    fn insert<T: AsChars<u16>>(&mut self, key: T, value: V) {
+    fn insert<T: AsChars<K>>(&mut self, key: T, value: V) {
         let id = &mut self.id;
         let link = &mut self.link;
         let data = &mut self.data;
@@ -68,7 +69,7 @@ impl<V> PrefixMap<u16, V> for RecursiveHashMap<V> {
     }
 
     #[inline]
-    fn each_prefix<T: AsChars<u16>, F: FnMut(usize, &[V])>(&self, key: T, mut f: F) {
+    fn each_prefix<T: AsChars<K>, F: FnMut(usize, &[V])>(&self, key: T, mut f: F) {
         let mut current_id = 0;
         for (ix, ch) in key.as_chars().enumerate() {
             match self.link.get(&(current_id, ch)) {

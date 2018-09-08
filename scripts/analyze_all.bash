@@ -37,5 +37,6 @@ set +e # エラー無視
 analyze array16
 analyze trie8
 analyze trie16
+analyze hash8
 analyze hash16
 analyze trans16 array16

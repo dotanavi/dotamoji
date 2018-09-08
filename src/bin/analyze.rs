@@ -55,7 +55,8 @@ fn main() {
 
     match dictype.as_str() {
         "array16" => analyze::<u16, DoubleArray<Info>>(&dic_file, &mat_file),
-        "hash16" => analyze::<u16, RecursiveHashMap<Info>>(&dic_file, &mat_file),
+        "hash8" => analyze::<u8, RecursiveHashMap<u8, Info>>(&dic_file, &mat_file),
+        "hash16" => analyze::<u16, RecursiveHashMap<u16, Info>>(&dic_file, &mat_file),
         "trie8" => analyze::<u8, Trie<u8, Info>>(&dic_file, &mat_file),
         "trie16" => analyze::<u16, Trie<u16, Info>>(&dic_file, &mat_file),
         _ => panic!("不明なタイプです。"),

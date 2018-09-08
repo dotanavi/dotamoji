@@ -37,7 +37,8 @@ fn main() {
 
     match dictype.as_str() {
         "array16" => test_all::<u16, DoubleArray<Info>>(&file),
-        "hash16" => test_all::<u16, RecursiveHashMap<Info>>(&file),
+        "hash8" => test_all::<u8, RecursiveHashMap<u8, Info>>(&file),
+        "hash16" => test_all::<u16, RecursiveHashMap<u16, Info>>(&file),
         "trie8" => test_all::<u8, Trie<u8, Info>>(&file),
         "trie16" => test_all::<u16, Trie<u16, Info>>(&file),
         _ => panic!("不明なタイプです。"),
