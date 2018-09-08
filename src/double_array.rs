@@ -1,5 +1,6 @@
 use super::PrefixMapOld;
 use as_chars::AsChars;
+use prefix_map::PrefixMap;
 use std::{
     char,
     cmp::{max, min},
@@ -80,10 +81,10 @@ impl<T> DoubleArray<T> {
     }
 
     #[inline]
-    fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], mut f: F) {
+    fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: impl AsChars<u16>, mut f: F) {
         let mut current_ix = 1;
-        for (ix, ch) in key.iter().enumerate() {
-            if let (Index::Transit, next_ix) = self.next_index(current_ix, *ch) {
+        for (ix, ch) in key.as_chars().enumerate() {
+            if let (Index::Transit, next_ix) = self.next_index(current_ix, ch) {
                 current_ix = next_ix;
                 if let Some(v) = self.data.get(current_ix) {
                     if v.len() > 0 {
@@ -271,6 +272,35 @@ impl<T: Debug> DoubleArray<T> {
                 self.data[i]
             );
         }
+    }
+}
+
+impl<V> Default for DoubleArray<V> {
+    #[inline]
+    fn default() -> Self {
+        DoubleArray::new()
+    }
+}
+
+impl<V> PrefixMap<u16, V> for DoubleArray<V> {
+    #[inline]
+    fn count(&self) -> usize {
+        self.count()
+    }
+
+    #[inline]
+    fn get<T: AsChars<u16>>(&self, key: T) -> Option<&[V]> {
+        self.get(key)
+    }
+
+    #[inline]
+    fn insert<T: AsChars<u16>>(&mut self, key: T, value: V) {
+        self.insert(key, value)
+    }
+
+    #[inline]
+    fn each_prefix<T: AsChars<u16>, F: FnMut(usize, &[V])>(&self, key: T, f: F) {
+        self.each_prefix16(key, f)
     }
 }
 

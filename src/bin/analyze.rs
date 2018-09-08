@@ -35,7 +35,8 @@ fn analyze<D: Dictionary>(dic_file: &str, mat_file: &str) {
     }
 }
 
-fn analyze_2<K, D>(dic_file: &str, mat_file: &str) where
+fn analyze_2<K, D>(dic_file: &str, mat_file: &str)
+where
     for<'a> &'a str: AsChars<K>,
     K: Copy + IntoString,
     D: NewDictionary<K>,

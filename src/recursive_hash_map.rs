@@ -21,7 +21,7 @@ impl<V> RecursiveHashMap<V> {
     }
 }
 
-impl <V> Default for RecursiveHashMap<V> {
+impl<V> Default for RecursiveHashMap<V> {
     fn default() -> Self {
         RecursiveHashMap::new()
     }
@@ -186,9 +186,6 @@ mod tests {
         pt.each_prefix("abcd", |len, data| {
             vec.push((len, data.to_owned()));
         });
-        assert_eq!(
-            vec,
-            vec![(1, vec![4, 5]), (3, vec![1])]
-        );
+        assert_eq!(vec, vec![(1, vec![4, 5]), (3, vec![1])]);
     }
 }
