@@ -88,6 +88,7 @@ impl<K: Eq + Hash, V> PrefixMap<K, V> for RecursiveHashMap<K, V> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    type RecursiveHashMap<T> = super::RecursiveHashMap<u8, T>;
 
     #[test]
     // "未登録の要素を取り出そうとするとNoneを返す"

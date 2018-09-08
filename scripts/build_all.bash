@@ -39,4 +39,5 @@ build trie32
 build hash8
 build hash16
 build hash32
+build array8
 build array16

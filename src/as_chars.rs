@@ -51,19 +51,59 @@ pub trait IntoString: Sized {
 }
 
 impl IntoString for u8 {
+    #[inline]
     fn into_string(chars: &[u8]) -> String {
         String::from_utf8_lossy(chars).into_owned()
     }
 }
 
 impl IntoString for u16 {
+    #[inline]
     fn into_string(chars: &[u16]) -> String {
         String::from_utf16_lossy(chars)
     }
 }
 
 impl IntoString for char {
+    #[inline]
     fn into_string(chars: &[char]) -> String {
         String::from_iter(chars.iter())
+    }
+}
+
+// -----------------------------------------------------------------------------
+
+pub trait AsUsize: Copy {
+    const MAX: Self;
+
+    fn as_usize(self) -> usize;
+    fn from_usize(n: usize) -> Self;
+}
+
+impl AsUsize for u8 {
+    const MAX: u8 = <u8>::max_value();
+
+    #[inline]
+    fn as_usize(self) -> usize {
+        self as usize
+    }
+
+    #[inline]
+    fn from_usize(n: usize) -> u8 {
+        n as u8
+    }
+}
+
+impl AsUsize for u16 {
+    const MAX: u16 = <u16>::max_value();
+
+    #[inline]
+    fn as_usize(self) -> usize {
+        self as usize
+    }
+
+    #[inline]
+    fn from_usize(n: usize) -> u16 {
+        n as u16
     }
 }

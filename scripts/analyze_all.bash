@@ -34,6 +34,7 @@ mkdir -p "$save_dir"
 echo
 
 set +e # エラー無視
+analyze array8
 analyze array16
 analyze trie8
 analyze trie16
