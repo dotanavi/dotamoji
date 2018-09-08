@@ -38,5 +38,5 @@ build trie_b
 build trie8
 build trie16
 build hash
-build array_a
-build array_b
+build array
+# build array_b

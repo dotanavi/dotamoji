@@ -23,7 +23,7 @@ fn test_all<D: Dictionary>(file: &str) {
 
 fn test_all_2<K, D>(file: &str)
 where
-    for <'a> &'a str: AsChars<K>,
+    for<'a> &'a str: AsChars<K>,
     D: NewDictionary<K>,
 {
     let dic = D::load_from_file(file);

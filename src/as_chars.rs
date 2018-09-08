@@ -1,6 +1,6 @@
 use std::iter::Cloned;
 use std::slice::Iter;
-use std::str::EncodeUtf16;
+use std::str::{self, EncodeUtf16};
 
 pub trait AsChars<T> {
     type I: Iterator<Item = T>;
@@ -31,5 +31,23 @@ impl<'a, T: Copy> AsChars<T> for &'a [T] {
     #[inline]
     fn as_chars(&self) -> Self::I {
         self.iter().cloned()
+    }
+}
+
+// -----------------------------------------------------------------------------
+
+pub trait IntoString: Sized {
+    fn into_string(chars: &[Self]) -> String;
+}
+
+impl IntoString for u8 {
+    fn into_string(chars: &[u8]) -> String {
+        String::from_utf8_lossy(chars).into_owned()
+    }
+}
+
+impl IntoString for u16 {
+    fn into_string(chars: &[u16]) -> String {
+        String::from_utf16_lossy(chars)
     }
 }

@@ -35,7 +35,7 @@ fn build<D: Dictionary>(file: &str) {
 
 fn build_2<K, D>(file: &str)
 where
-    for <'a> &'a str: AsChars<K>,
+    for<'a> &'a str: AsChars<K>,
     D: NewDictionary<K>,
 {
     let stdin = io::stdin();
