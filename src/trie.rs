@@ -1,70 +1,13 @@
-use super::PrefixMapOld;
 use as_chars::AsChars;
+use prefix_map::PrefixMap;
 
-pub trait Node<T> {
-    fn new() -> Self;
-
-    fn search(&self, ch: u16) -> Result<usize, usize>;
-
-    fn next_node(&self, index: usize) -> &Self;
-
-    fn search_or_create(&mut self, ch: u16) -> &mut Self;
-
-    fn count_data(&self) -> usize;
-
-    fn get_data(&self) -> &[T];
-
-    fn push_data(&mut self, data: T);
-
-    fn dig_get(&self, mut iter: impl Iterator<Item = u16>) -> Option<&[T]> {
-        if let Some(ch) = iter.next() {
-            if let Ok(index) = self.search(ch) {
-                return self.next_node(index).dig_get(iter);
-            }
-            None
-        } else {
-            let data = self.get_data();
-            if data.len() > 0 {
-                Some(data)
-            } else {
-                None
-            }
-        }
-    }
-
-    fn dig_set(&mut self, mut iter: impl Iterator<Item = u16>, data: T) {
-        if let Some(ch) = iter.next() {
-            self.search_or_create(ch).dig_set(iter, data);
-        } else {
-            self.push_data(data);
-        }
-    }
-
-    fn dig_yield<I: Iterator<Item = u16>, F: FnMut(usize, &[T])>(
-        &self,
-        depth: usize,
-        mut iter: I,
-        mut f: F,
-    ) {
-        let data = self.get_data();
-        if data.len() > 0 {
-            f(depth, data);
-        }
-        if let Some(ch) = iter.next() {
-            if let Ok(index) = self.search(ch) {
-                return self.next_node(index).dig_yield(depth + 1, iter, f);
-            }
-        }
-    }
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Node<K, V> {
+    pub data: Vec<V>,
+    pub children: Vec<(K, Node<K, V>)>,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct NodeA<T> {
-    pub children: Vec<(u16, NodeA<T>)>,
-    pub data: Vec<T>,
-}
-
-impl<T> Node<T> for NodeA<T> {
+impl<K, V> Node<K, V> {
     #[inline]
     fn new() -> Self {
         Self {
@@ -72,19 +15,41 @@ impl<T> Node<T> for NodeA<T> {
             data: vec![],
         }
     }
+}
+
+impl<K: Copy + Ord, V> Node<K, V> {
+    #[inline]
+    fn count(&self) -> usize {
+        let mut sum = self.data.len();
+        for (_, ch) in &self.children {
+            sum += ch.count();
+        }
+        return sum;
+    }
 
     #[inline]
-    fn search(&self, ch: u16) -> Result<usize, usize> {
+    fn search(&self, ch: K) -> Result<usize, usize> {
         self.children.binary_search_by_key(&ch, |&(c, _)| c)
     }
 
     #[inline]
-    fn next_node(&self, index: usize) -> &Self {
-        &self.children[index].1
+    fn get<I: Iterator<Item = K>>(&self, key: I) -> Option<&[V]> {
+        let mut cursor = self;
+        for ch in key {
+            match cursor.search(ch) {
+                Ok(ix) => cursor = &cursor.children[ix].1,
+                Err(_) => return None,
+            }
+        }
+        if cursor.data.len() > 0 {
+            Some(&cursor.data[..])
+        } else {
+            None
+        }
     }
 
     #[inline]
-    fn search_or_create(&mut self, ch: u16) -> &mut Self {
+    fn search_or_create<'a>(&'a mut self, ch: K) -> &'a mut Self {
         let index = match self.search(ch) {
             Ok(index) => index,
             Err(index) => {
@@ -96,110 +61,273 @@ impl<T> Node<T> for NodeA<T> {
     }
 
     #[inline]
-    fn get_data(&self) -> &[T] {
-        &self.data
-    }
-
-    #[inline]
-    fn push_data(&mut self, data: T) {
-        self.data.push(data);
-    }
-
-    fn count_data(&self) -> usize {
-        let child_count: usize = self.children.iter().map(|(_, n)| n.count_data()).sum();
-        child_count + self.data.len()
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct NodeB<T> {
-    pub labels: Vec<u16>,
-    pub nodes: Vec<NodeB<T>>,
-    pub data: Vec<T>,
-}
-
-impl<T> Node<T> for NodeB<T> {
-    #[inline]
-    fn new() -> Self {
-        Self {
-            labels: vec![],
-            nodes: vec![],
-            data: vec![],
+    fn insert_rec<I: Iterator<Item = K>>(&mut self, mut iter: I, value: V) {
+        if let Some(ch) = iter.next() {
+            self.search_or_create(ch).insert_rec(iter, value);
+        } else {
+            self.data.push(value);
         }
     }
 
     #[inline]
-    fn search(&self, ch: u16) -> Result<usize, usize> {
-        self.labels.binary_search_by_key(&ch, |&c| c)
-    }
-
-    #[inline]
-    fn next_node(&self, index: usize) -> &Self {
-        &self.nodes[index]
-    }
-
-    #[inline]
-    fn search_or_create(&mut self, ch: u16) -> &mut Self {
-        let index = match self.search(ch) {
-            Ok(index) => index,
-            Err(index) => {
-                self.labels.insert(index, ch);
-                self.nodes.insert(index, Node::new());
-                index
+    fn each_prefix<I: Iterator<Item = K>, F: FnMut(usize, &[V])>(&self, iter: I, mut f: F) {
+        let mut cursor = self;
+        for (chix, ch) in iter.enumerate() {
+            match cursor.search(ch) {
+                Ok(ix) => cursor = &cursor.children[ix].1,
+                Err(_) => return,
             }
-        };
-        &mut self.nodes[index]
-    }
-
-    #[inline]
-    fn get_data(&self) -> &[T] {
-        &self.data
-    }
-
-    #[inline]
-    fn push_data(&mut self, data: T) {
-        self.data.push(data);
-    }
-
-    fn count_data(&self) -> usize {
-        let child_count: usize = self.nodes.iter().map(|n| n.count_data()).sum();
-        child_count + self.data.len()
+            if cursor.data.len() > 0 {
+                f(chix + 1, &cursor.data[..]);
+            }
+        }
     }
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Trie<N> {
-    pub(crate) root: N,
+pub struct Trie<K, V> {
+    pub root: Node<K, V>,
 }
 
-impl<T, N: Node<T>> PrefixMapOld<T> for Trie<N> {
+impl<K, V> Trie<K, V> {
     #[inline]
-    fn new() -> Self {
-        Trie { root: Node::new() }
+    pub fn new() -> Self {
+        Self { root: Node::new() }
     }
+}
 
+impl<K, V> Default for Trie<K, V> {
+    #[inline]
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<K: Copy + Ord, V> PrefixMap<K, V> for Trie<K, V> {
     #[inline]
     fn count(&self) -> usize {
-        self.root.count_data()
+        self.root.count()
     }
 
     #[inline]
-    fn get(&self, key: impl AsChars<u16>) -> Option<&[T]> {
-        self.root.dig_get(key.as_chars())
-    }
-
-    #[allow(unused_variables)]
-    fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, f: F) {
-        unimplemented!();
-    }
-
-    #[allow(unused_variables)]
-    fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], f: F) {
-        self.root.dig_yield(0, key.as_chars(), f);
+    fn get<T: AsChars<K>>(&self, key: T) -> Option<&[V]> {
+        self.root.get(key.as_chars())
     }
 
     #[inline]
-    fn insert(&mut self, key: impl AsChars<u16>, value: T) {
-        self.root.dig_set(key.as_chars(), value);
+    fn insert<T: AsChars<K>>(&mut self, key: T, value: V) {
+        self.root.insert_rec(key.as_chars(), value);
+    }
+
+    #[inline]
+    fn each_prefix<T: AsChars<K>, F: FnMut(usize, &[V])>(&self, key: T, f: F) {
+        self.root.each_prefix(key.as_chars(), f);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    type Dic16<T> = Trie<u16, T>;
+    type Dic8<T> = Trie<u8, T>;
+
+    #[test]
+    // "未登録の要素を取り出そうとするとNoneを返す"
+    fn test_not_registered() {
+        {
+            let dic: Dic16<()> = Dic16::new();
+            assert_eq!(dic.get("abc"), None);
+        }
+        {
+            let dic: Dic8<()> = Dic8::new();
+            assert_eq!(dic.get("abc"), None);
+        }
+    }
+
+    #[test]
+    // "配列の長さが足りない場合はNoneを返す"
+    fn test_small() {
+        {
+            let dic: Dic16<()> = Dic16::new();
+            assert_eq!(dic.get("abc"), None);
+        }
+        {
+            let dic: Dic8<()> = Dic8::new();
+            assert_eq!(dic.get("abc"), None);
+        }
+    }
+
+    #[test]
+    // "途中までのキーが登録されている場合はNoneを返す"
+    fn test_mid() {
+        {
+            let mut dic = Dic16::new();
+            dic.insert("ab", 1);
+            assert_eq!(dic.get("abc"), None);
+        }
+        {
+            let mut dic = Dic8::new();
+            dic.insert("ab", 1);
+            assert_eq!(dic.get("abc"), None);
+        }
+    }
+
+    #[test]
+    // "遷移は可能だがdataが登録されていない場合はNoneを返す"
+    fn test_over() {
+        {
+            let mut dic = Dic16::new();
+            dic.insert("abcd", 1);
+            assert_eq!(dic.get("abc"), None);
+        }
+        {
+            let mut dic = Dic8::new();
+            dic.insert("abcd", 1);
+            assert_eq!(dic.get("abc"), None);
+        }
+    }
+
+    #[test]
+    // "衝突しない要素の登録"
+    fn test_no_conflict() {
+        {
+            let mut dic = Dic16::new();
+            dic.insert("abc", 1);
+            dic.insert("ab", 2);
+            assert_eq!(dic.get("abc"), Some(&[1][..]));
+            assert_eq!(dic.get("ab"), Some(&[2][..]));
+        }
+        {
+            let mut dic = Dic8::new();
+            dic.insert("abc", 1);
+            dic.insert("ab", 2);
+            assert_eq!(dic.get("abc"), Some(&[1][..]));
+            assert_eq!(dic.get("ab"), Some(&[2][..]));
+        }
+    }
+
+    #[test]
+    // "重複していない値の登録"
+    fn test_dup_value() {
+        {
+            let mut dic = Dic16::new();
+            dic.insert("ab", 1);
+            dic.insert("ab", 2);
+            assert_eq!(dic.get("ab"), Some(&[1, 2][..]));
+        }
+        {
+            let mut dic = Dic8::new();
+            dic.insert("ab", 1);
+            dic.insert("ab", 2);
+            assert_eq!(dic.get("ab"), Some(&[1, 2][..]));
+        }
+    }
+
+    #[test]
+    // "衝突する場合"
+    fn test_conflict() {
+        {
+            let mut dic = Dic16::new();
+            dic.insert("abc", 1);
+            dic.insert("ad", 2);
+            dic.insert("ac", 3);
+
+            assert_eq!(dic.get("abc"), Some(&[1][..]));
+            assert_eq!(dic.get("ad"), Some(&[2][..]));
+            assert_eq!(dic.get("ac"), Some(&[3][..]));
+        }
+        {
+            let mut dic = Dic8::new();
+            dic.insert("abc", 1);
+            dic.insert("ad", 2);
+            dic.insert("ac", 3);
+
+            assert_eq!(dic.get("abc"), Some(&[1][..]));
+            assert_eq!(dic.get("ad"), Some(&[2][..]));
+            assert_eq!(dic.get("ac"), Some(&[3][..]));
+        }
+    }
+
+    #[test]
+    // "マルチバイト文字"
+    fn test_multibyte() {
+        {
+            let mut dic = Dic16::new();
+            dic.insert("おはよう", 1);
+            dic.insert("およごう", 2);
+            dic.insert("🍣", 3);
+            dic.insert("🍺", 4);
+
+            assert_eq!(dic.get("おはよう"), Some(&[1][..]));
+            assert_eq!(dic.get("およごう"), Some(&[2][..]));
+            assert_eq!(dic.get("🍣"), Some(&[3][..]));
+            assert_eq!(dic.get("🍺"), Some(&[4][..]));
+        }
+        {
+            let mut dic = Dic8::new();
+            dic.insert("おはよう", 1);
+            dic.insert("およごう", 2);
+            dic.insert("🍣", 3);
+            dic.insert("🍺", 4);
+
+            assert_eq!(dic.get("おはよう"), Some(&[1][..]));
+            assert_eq!(dic.get("およごう"), Some(&[2][..]));
+            assert_eq!(dic.get("🍣"), Some(&[3][..]));
+            assert_eq!(dic.get("🍺"), Some(&[4][..]));
+        }
+    }
+
+    #[test]
+    // "遷移先ノードを正確に取得できているか"
+    fn test_transite() {
+        {
+            let mut dic = Dic16::new();
+            dic.insert("ba", 1);
+            dic.insert("bb", 2);
+
+            assert_eq!(dic.get("ba"), Some(&[1][..]));
+            assert_eq!(dic.get("bb"), Some(&[2][..]));
+        }
+        {
+            let mut dic = Dic8::new();
+            dic.insert("ba", 1);
+            dic.insert("bb", 2);
+
+            assert_eq!(dic.get("ba"), Some(&[1][..]));
+            assert_eq!(dic.get("bb"), Some(&[2][..]));
+        }
+    }
+
+    #[test]
+    // "前方一致検索。"
+    fn test_prefix() {
+        {
+            let mut dic = Dic16::new();
+            dic.insert("abc", 1);
+            dic.insert("ad", 2);
+            dic.insert("ac", 3);
+            dic.insert("a", 4);
+            dic.insert("a", 5);
+
+            let mut vec = vec![];
+            dic.each_prefix("abcd", |len, data| {
+                vec.push((len, data.to_owned()));
+            });
+            assert_eq!(vec, vec![(1, vec![4, 5]), (3, vec![1])]);
+        }
+        {
+            let mut dic = Dic8::new();
+            dic.insert("abc", 1);
+            dic.insert("ad", 2);
+            dic.insert("ac", 3);
+            dic.insert("a", 4);
+            dic.insert("a", 5);
+
+            let mut vec = vec![];
+            dic.each_prefix("abcd", |len, data| {
+                vec.push((len, data.to_owned()));
+            });
+            assert_eq!(vec, vec![(1, vec![4, 5]), (3, vec![1])]);
+        }
     }
 }

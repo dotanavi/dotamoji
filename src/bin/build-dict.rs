@@ -62,10 +62,8 @@ fn main() {
         "array" => build::<DoubleArrayDict>(&file),
         "array16" => build_2::<u16, DoubleArrayDict>(&file),
         "hash" => build_2::<u16, RecHashDict>(&file),
-        "trie" | "trie_a" => build::<TrieDictA>(&file),
-        "trie_b" => build::<TrieDictB>(&file),
-        "trie8" => build_2::<u8, Trie2<u8, Info>>(&file),
-        "trie16" => build_2::<u16, Trie2<u16, Info>>(&file),
+        "trie8" => build_2::<u8, Trie<u8, Info>>(&file),
+        "trie16" => build_2::<u16, Trie<u16, Info>>(&file),
         "trans16" => build_2::<u16, Trans<Info>>(&file),
         _ => panic!("不明なタイプです。"),
     }

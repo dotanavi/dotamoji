@@ -55,10 +55,8 @@ fn main() {
         "array" => test_all::<DoubleArrayDict>(&file),
         "array16" => test_all_2::<u16, DoubleArrayDict>(&file),
         "hash" => test_all_2::<u16, RecHashDict>(&file),
-        "trie" | "trie_a" => test_all::<TrieDictA>(&file),
-        "trie8" => test_all_2::<u8, Trie2<u8, Info>>(&file),
-        "trie16" => test_all_2::<u16, Trie2<u16, Info>>(&file),
-        "trie_b" => test_all::<TrieDictB>(&file),
+        "trie8" => test_all_2::<u8, Trie<u8, Info>>(&file),
+        "trie16" => test_all_2::<u16, Trie<u16, Info>>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }

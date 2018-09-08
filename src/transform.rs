@@ -10,7 +10,7 @@ use dictionary::NewDictionary;
 use double_array::DoubleArray;
 use prefix_map::PrefixMap;
 use search_cache::*;
-use trie2::{Node, Trie};
+use trie::{Node, Trie};
 
 type K = u16;
 

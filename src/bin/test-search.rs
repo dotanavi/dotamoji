@@ -31,7 +31,6 @@ fn main() {
 
     match dictype.as_str() {
         "array" => search_test::<DoubleArrayDict>(&file),
-        "trie" => search_test::<TrieDictA>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }

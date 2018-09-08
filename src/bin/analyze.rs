@@ -86,10 +86,8 @@ fn main() {
         "array" => analyze::<DoubleArrayDict>(&dic_file, &mat_file),
         "array16" => analyze_2::<u16, DoubleArrayDict>(&dic_file, &mat_file),
         "hash" => analyze_2::<u16, RecHashDict>(&dic_file, &mat_file),
-        "trie" | "trie_a" => analyze::<TrieDictA>(&dic_file, &mat_file),
-        "trie_b" => analyze::<TrieDictB>(&dic_file, &mat_file),
-        "trie8" => analyze_2::<u8, Trie2<u8, Info>>(&dic_file, &mat_file),
-        "trie16" => analyze_2::<u16, Trie2<u16, Info>>(&dic_file, &mat_file),
+        "trie8" => analyze_2::<u8, Trie<u8, Info>>(&dic_file, &mat_file),
+        "trie16" => analyze_2::<u16, Trie<u16, Info>>(&dic_file, &mat_file),
         _ => panic!("不明なタイプです。"),
     }
 }
