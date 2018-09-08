@@ -32,6 +32,7 @@ mkdir -p "$save_dir"
   cargo build --release
 )
 
+build trans8 array8
 build trans16 array16
 build trie8
 build trie16

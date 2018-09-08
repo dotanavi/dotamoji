@@ -1,9 +1,8 @@
 use std::fs::File;
 use std::io::BufWriter;
 use std::mem::swap;
-
+use as_chars::AsUsize;
 use bincode;
-
 use as_chars::AsChars;
 use dictionary::NewDictionary;
 use double_array::DoubleArray;
@@ -12,21 +11,19 @@ use prefix_map::PrefixMap;
 use search_cache::*;
 use trie::{Node, Trie};
 
-type K = u16;
-
-pub enum Trans<V> {
+pub enum Trans<K, V> {
     Array(Box<DoubleArray<K, V>>),
     Trie(Box<Trie<K, V>>),
 }
 
-impl<V> Default for Trans<V> {
+impl<K, V> Default for Trans<K, V> {
     #[inline]
     fn default() -> Self {
         Trans::Trie(Box::new(Trie::new()))
     }
 }
 
-impl<V> PrefixMap<K, V> for Trans<V> {
+impl<K: AsUsize + Ord, V> PrefixMap<K, V> for Trans<K, V> {
     #[inline]
     fn count(&self) -> usize {
         match self {
@@ -62,7 +59,7 @@ impl<V> PrefixMap<K, V> for Trans<V> {
     }
 }
 
-impl NewDictionary<K> for Trans<Info> {
+impl<K: AsUsize + Ord> NewDictionary<K> for Trans<K, Info> {
     fn load_from_file(_: &str) -> Self {
         panic!("ファイルのロードには対応していません。");
     }
@@ -79,7 +76,8 @@ impl NewDictionary<K> for Trans<Info> {
         Trans::Array(array)
     }
 }
-pub fn transform<V>(trie: Trie<K, V>) -> DoubleArray<K, V> {
+
+pub fn transform<K: AsUsize, V>(trie: Trie<K, V>) -> DoubleArray<K, V> {
     // show_stats(&trie.root);
 
     let mut base = vec![0, 0];
@@ -97,7 +95,7 @@ pub fn transform<V>(trie: Trie<K, V>) -> DoubleArray<K, V> {
     return DoubleArray::from_raw_parts(base, check, data);
 }
 
-fn put_rec<V, C: SearchCache>(
+fn put_rec<K: AsUsize, V, C: SearchCache>(
     mut node: Node<K, V>,
     base_index: usize,
     base: &mut Vec<u32>,
@@ -113,13 +111,13 @@ fn put_rec<V, C: SearchCache>(
     }
 
     let new_base = {
-        let ch = node.children[0].0 as usize;
+        let ch = node.children[0].0.as_usize();
 
         let mut index = 0;
         'outer: loop {
             index = cache.find_empty(ch, index, check);
             for &(ch, _) in &node.children[1..] {
-                if cache.is_filled(index + ch as usize, check) {
+                if cache.is_filled(index + ch.as_usize(), check) {
                     continue 'outer;
                 }
             }
@@ -128,7 +126,7 @@ fn put_rec<V, C: SearchCache>(
     };
     base[base_index] = new_base as u32;
 
-    let requred_size = new_base + node.children.last().unwrap().0 as usize + 1;
+    let requred_size = new_base + node.children.last().unwrap().0.as_usize() + 1;
     if requred_size > base.len() {
         base.resize(requred_size, 0);
         check.resize(requred_size, 0);
@@ -137,12 +135,12 @@ fn put_rec<V, C: SearchCache>(
         cache.extend(requred_size);
     }
     for &(ch, _) in &node.children {
-        let index = new_base + ch as usize;
+        let index = new_base + ch.as_usize();
         cache.mark(index);
         check[index] = base_index as u32;
     }
     for (ch, child_node) in node.children {
-        put_rec(child_node, new_base + ch as usize, base, check, data, cache);
+        put_rec(child_node, new_base + ch.as_usize(), base, check, data, cache);
     }
 }
 

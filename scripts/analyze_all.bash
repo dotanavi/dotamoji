@@ -42,4 +42,5 @@ analyze trie32
 analyze hash8
 analyze hash16
 analyze hash32
+analyze trans8 array8
 analyze trans16 array16

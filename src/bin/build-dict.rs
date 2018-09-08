@@ -56,7 +56,8 @@ fn main() {
         "trie8" => build::<u8, Trie<u8, Info>>(&file),
         "trie16" => build::<u16, Trie<u16, Info>>(&file),
         "trie32" => build::<char, Trie<char, Info>>(&file),
-        "trans16" => build::<u16, Trans<Info>>(&file),
+        "trans8" => build::<u8, Trans<u8, Info>>(&file),
+        "trans16" => build::<u16, Trans<u16, Info>>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }
