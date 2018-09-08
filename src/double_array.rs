@@ -160,7 +160,7 @@ impl<K: AsUsize, V> DoubleArray<K, V> {
         debug_assert!(current_base > 0);
         // 1. currIdx から遷移しているすべてのノード(遷移先ノード)を取得 (index, char)
         let mut next_nodes = vec![];
-        for i in current_base..min(self.check.len(), current_base + K::MAX.as_usize()) {
+        for i in current_base..min(self.check.len(), current_base + K::MAX) {
             if self.check[i] as usize == current_ix {
                 next_nodes.push(K::from_usize(i - current_base));
             }
@@ -186,7 +186,7 @@ impl<K: AsUsize, V> DoubleArray<K, V> {
                 // 4. 旧遷移先ノードから更に遷移しているノードの check を新遷移先ノードの index で更新
                 let src_ix = src_ix as u32;
                 let dst_ix = dst_ix as u32;
-                let range = src_base..min(self.check.len(), src_base + K::MAX.as_usize());
+                let range = src_base..min(self.check.len(), src_base + K::MAX);
                 for mut c in &mut self.check[range] {
                     if *c == src_ix {
                         *c = dst_ix

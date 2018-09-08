@@ -86,12 +86,11 @@ pub fn transform<K: AsUsize, V>(trie: Trie<K, V>) -> DoubleArray<K, V> {
     let mut data = vec![vec![], vec![]];
 
     // let mut cache = NoCache::new(2);
-    // let mut cache = DoubleCheck::<BitCache, NoCache>::new(2);
     // let mut cache = BoolCache::new(2);
     // let mut cache = BitCache::new(2);
     let mut cache = BitCache0::new(2);
     // let mut cache = LinkCache::new(2);
-    // let mut cache = DoubleCheck::<BitCache, NoCache>::new(2);
+    // let mut cache = DoubleCheck::<BitCache, BitCache0>::new(2);
 
     let start = Instant::now();
     put_rec(trie.root, 1, &mut base, &mut check, &mut data, &mut cache);

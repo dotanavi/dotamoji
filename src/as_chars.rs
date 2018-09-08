@@ -74,14 +74,14 @@ impl IntoString for char {
 // -----------------------------------------------------------------------------
 
 pub trait AsUsize: Copy {
-    const MAX: Self;
+    const MAX: usize;
 
     fn as_usize(self) -> usize;
     fn from_usize(n: usize) -> Self;
 }
 
 impl AsUsize for u8 {
-    const MAX: u8 = <u8>::max_value();
+    const MAX: usize = <u8>::max_value() as usize;
 
     #[inline]
     fn as_usize(self) -> usize {
@@ -95,7 +95,7 @@ impl AsUsize for u8 {
 }
 
 impl AsUsize for u16 {
-    const MAX: u16 = <u16>::max_value();
+    const MAX: usize = <u16>::max_value() as usize;
 
     #[inline]
     fn as_usize(self) -> usize {
@@ -105,5 +105,20 @@ impl AsUsize for u16 {
     #[inline]
     fn from_usize(n: usize) -> u16 {
         n as u16
+    }
+}
+
+impl AsUsize for char {
+    const MAX: usize = <u32>::max_value() as usize;
+
+    #[inline]
+    fn as_usize(self) -> usize {
+        self as usize
+    }
+
+    #[inline]
+    fn from_usize(n: usize) -> char {
+        use std::char::from_u32_unchecked;
+        unsafe { from_u32_unchecked(n as u32) }
     }
 }

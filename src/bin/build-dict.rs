@@ -6,6 +6,7 @@ use std::str::FromStr;
 
 use dotamoji::*;
 
+#[inline]
 fn read_int<T: FromStr>(str: &str) -> T {
     match str.parse() {
         Ok(x) => x,
@@ -13,6 +14,7 @@ fn read_int<T: FromStr>(str: &str) -> T {
     }
 }
 
+#[inline]
 fn line_to_info<'a>(line: &'a str) -> (&'a str, Info) {
     let mut row = line.split(",");
     let word = row.next().expect("文字が取得できません");
@@ -22,6 +24,7 @@ fn line_to_info<'a>(line: &'a str) -> (&'a str, Info) {
     (word, Info::new(left, right, cost))
 }
 
+#[inline]
 fn build<K, D>(file: &str)
 where
     for<'a> &'a str: AsChars<K>,
@@ -58,6 +61,7 @@ fn main() {
         "trie32" => build::<char, Trie<char, Info>>(&file),
         "trans8" => build::<u8, Trans<u8, Info>>(&file),
         "trans16" => build::<u16, Trans<u16, Info>>(&file),
+        "trans32" => build::<char, Trans<char, Info>>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }

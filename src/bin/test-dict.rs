@@ -5,6 +5,7 @@ use std::io::{self, BufRead};
 
 use dotamoji::*;
 
+#[inline]
 fn test_all<K, D>(file: &str)
 where
     for<'a> &'a str: AsChars<K>,
@@ -38,6 +39,7 @@ fn main() {
     match dictype.as_str() {
         "array8" => test_all::<u8, DoubleArray<u8, Info>>(&file),
         "array16" => test_all::<u16, DoubleArray<u16, Info>>(&file),
+        "array32" => test_all::<char, DoubleArray<char, Info>>(&file),
         "hash8" => test_all::<u8, RecursiveHashMap<u8, Info>>(&file),
         "hash16" => test_all::<u16, RecursiveHashMap<u16, Info>>(&file),
         "hash32" => test_all::<char, RecursiveHashMap<char, Info>>(&file),

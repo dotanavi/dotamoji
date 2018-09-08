@@ -6,6 +6,7 @@ use std::time::Instant;
 
 use dotamoji::*;
 
+#[inline]
 fn analyze<K, D>(dic_file: &str, mat_file: &str)
 where
     for<'a> &'a str: AsChars<K>,
@@ -56,6 +57,7 @@ fn main() {
     match dictype.as_str() {
         "array8" => analyze::<u8, DoubleArray<u8, Info>>(&dic_file, &mat_file),
         "array16" => analyze::<u16, DoubleArray<u16, Info>>(&dic_file, &mat_file),
+        "array32" => analyze::<char, DoubleArray<char, Info>>(&dic_file, &mat_file),
         "hash8" => analyze::<u8, RecursiveHashMap<u8, Info>>(&dic_file, &mat_file),
         "hash16" => analyze::<u16, RecursiveHashMap<u16, Info>>(&dic_file, &mat_file),
         "hash32" => analyze::<char, RecursiveHashMap<char, Info>>(&dic_file, &mat_file),
