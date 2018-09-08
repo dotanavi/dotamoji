@@ -22,18 +22,7 @@ fn line_to_info<'a>(line: &'a str) -> (&'a str, Info) {
     (word, Info::new(left, right, cost))
 }
 
-fn build<D: Dictionary>(file: &str) {
-    let stdin = io::stdin();
-    let mut dic = D::new();
-    for line in stdin.lock().lines().filter_map(Result::ok) {
-        let (word, info) = line_to_info(&line);
-        dic.insert(word, info);
-    }
-    dic.save_to_file(file);
-    println!("{} を作成しました。", file);
-}
-
-fn build_2<K, D>(file: &str)
+fn build<K, D>(file: &str)
 where
     for<'a> &'a str: AsChars<K>,
     D: NewDictionary<K>,
@@ -59,12 +48,11 @@ fn main() {
         .expect("ファイルが指定されていません。");
 
     match dictype.as_str() {
-        "array" => build::<DoubleArrayDict>(&file),
-        "array16" => build_2::<u16, DoubleArrayDict>(&file),
-        "hash" => build_2::<u16, RecHashDict>(&file),
-        "trie8" => build_2::<u8, Trie<u8, Info>>(&file),
-        "trie16" => build_2::<u16, Trie<u16, Info>>(&file),
-        "trans16" => build_2::<u16, Trans<Info>>(&file),
+        "array16" => build::<u16, DoubleArrayDict>(&file),
+        "hash" => build::<u16, RecHashDict>(&file),
+        "trie8" => build::<u8, Trie<u8, Info>>(&file),
+        "trie16" => build::<u16, Trie<u16, Info>>(&file),
+        "trans16" => build::<u16, Trans<Info>>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }

@@ -20,16 +20,16 @@ impl Node {
     }
 }
 
-pub struct Analyzed {
-    sentence: Vec<u16>,
+pub struct Analyzed<K> {
+    sentence: Vec<K>,
     nodes: Vec<Vec<Node>>,
     pub cost: i32,
     index: u8,
 }
 
-impl Analyzed {
+impl<K> Analyzed<K> {
     #[inline]
-    pub fn iter(&self) -> Iter {
+    pub fn iter(&self) -> Iter<K> {
         Iter {
             x: self.index,
             y: 0,
@@ -38,20 +38,20 @@ impl Analyzed {
     }
 }
 
-pub struct Token<'a> {
-    pub word: &'a [u16],
+pub struct Token<'a, K: 'a> {
+    pub word: &'a [K],
     pub id: u16,
     pub cost: i32,
 }
 
-pub struct Iter<'a> {
+pub struct Iter<'a, K: 'a> {
     x: u8,
     y: u32,
-    analyzed: &'a Analyzed,
+    analyzed: &'a Analyzed<K>,
 }
 
-impl<'a> Iterator for Iter<'a> {
-    type Item = Token<'a>;
+impl<'a, K> Iterator for Iter<'a, K> {
+    type Item = Token<'a, K>;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -82,18 +82,19 @@ fn find_min_cost(src_id: u16, nodes: &[Node], matrix: &Matrix) -> Option<(usize,
 }
 
 #[inline]
-pub fn analyze<D: PrefixMapOld<Info>>(
-    sentence: &str,
-    dic: &D,
-    matrix: &Matrix,
-) -> Result<Analyzed, ()> {
-    let sentence: Vec<u16> = sentence.encode_utf16().collect();
+pub fn analyze<K, D>(sentence: &str, dic: &D, matrix: &Matrix) -> Result<Analyzed<K>, ()>
+where
+    for<'a> &'a str: AsChars<K>,
+    K: Copy,
+    D: PrefixMap<K, Info>,
+{
+    let sentence: Vec<K> = sentence.as_chars().collect();
     let mut nodes = Vec::with_capacity(sentence.len() + 1);
     nodes.push(vec![Node::new(0, 0, 0, 0)]);
     for ix in (0..sentence.len()).rev() {
         debug_assert!(nodes.len() == sentence.len() - ix);
         let mut column = vec![];
-        dic.each_prefix16(&sentence[ix..], |len, info_list| {
+        dic.each_prefix(&sentence[ix..], |len, info_list| {
             let search_nodes = &nodes[nodes.len() - len];
             for info in info_list {
                 match find_min_cost(info.right_id, search_nodes, matrix) {

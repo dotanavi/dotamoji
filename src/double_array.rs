@@ -1,4 +1,3 @@
-use super::PrefixMapOld;
 use as_chars::AsChars;
 use prefix_map::PrefixMap;
 use std::{
@@ -301,33 +300,6 @@ impl<V> PrefixMap<u16, V> for DoubleArray<V> {
     #[inline]
     fn each_prefix<T: AsChars<u16>, F: FnMut(usize, &[V])>(&self, key: T, f: F) {
         self.each_prefix16(key, f)
-    }
-}
-
-impl<T> PrefixMapOld<T> for DoubleArray<T> {
-    #[inline]
-    fn new() -> Self {
-        DoubleArray::new()
-    }
-    #[inline]
-    fn count(&self) -> usize {
-        self.count()
-    }
-    #[inline]
-    fn get(&self, key: impl AsChars<u16>) -> Option<&[T]> {
-        self.get(key)
-    }
-    #[inline]
-    fn each_prefix<F: FnMut(&[u16], &[T])>(&self, key: &str, f: F) {
-        self.each_prefix(key, f)
-    }
-    #[inline]
-    fn each_prefix16<F: FnMut(usize, &[T])>(&self, key: &[u16], f: F) {
-        self.each_prefix16(key, f)
-    }
-    #[inline]
-    fn insert(&mut self, key: impl AsChars<u16>, value: T) {
-        self.insert(key, value)
     }
 }
 

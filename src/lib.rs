@@ -5,7 +5,6 @@ extern crate fnv;
 extern crate serde;
 
 mod analyze;
-mod analyze2;
 mod as_chars;
 mod dictionary;
 mod double_array;
@@ -17,7 +16,6 @@ mod transform;
 mod trie;
 
 pub use analyze::analyze;
-pub use analyze2::analyze as analyze2;
 pub use as_chars::{AsChars, IntoString};
 pub use dictionary::*;
 pub use double_array::DoubleArray;
