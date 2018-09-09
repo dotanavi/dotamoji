@@ -11,7 +11,7 @@ fn analyze<K, D>(dic_file: &str, mat_file: &str)
 where
     for<'a> &'a str: AsChars<K>,
     K: Copy + IntoString,
-    D: NewDictionary<K>,
+    D: LoadDict<K, Info>,
 {
     let start = Instant::now();
     let dic = D::load_from_file(dic_file);
