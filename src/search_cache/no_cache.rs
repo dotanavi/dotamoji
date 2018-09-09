@@ -1,5 +1,6 @@
 use super::SearchCache;
 
+#[derive(Serialize, Deserialize)]
 pub struct NoCache;
 
 impl SearchCache for NoCache {
