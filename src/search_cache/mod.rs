@@ -1,12 +1,12 @@
-mod bit_cache;
 mod bit_cache0;
+mod bit_cache1;
 mod bool_cache;
 mod double_check;
 mod link_cache;
 mod no_cache;
 
-pub use self::bit_cache::BitCache;
 pub use self::bit_cache0::BitCache as BitCache0;
+pub use self::bit_cache1::BitCache as BitCache1;
 pub use self::bool_cache::BoolCache;
 pub use self::double_check::DoubleCheck;
 pub use self::link_cache::LinkCache;

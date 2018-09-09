@@ -180,16 +180,47 @@ fn calc_stats_rec<K, V>(node: &Node<K, V>, table: &mut Vec<u8>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    type Trie<V> = super::super::trie::Trie<u8, V>;
+    type Trie8<V> = super::super::trie::Trie<u8, V>;
+
+    macro_rules! combine_cache {
+        ($c:ty, $($cs:tt)* ) => (DoubleCheck<$c, combine_cache!($($cs)*)>);
+        ($c:ty) => ($c);
+    }
+    type TestSearchCache = combine_cache!(BitCache0, BitCache1, BoolCache, LinkCache, NoCache);
+
+    #[test]
+    fn test_cache_size() {
+        use std::mem::size_of;
+
+        assert_eq!(
+            size_of::<TestSearchCache>(),
+            (0
+                + size_of::<BitCache0>()
+                + size_of::<BitCache1>()
+                + size_of::<BoolCache>()
+                + size_of::<LinkCache>()
+                + size_of::<NoCache>())
+        );
+    }
+
+    pub fn test_transform<K: AsUsize, V>(trie: Trie<K, V>) -> DoubleArray<K, V> {
+        let mut base = vec![0, 0];
+        let mut check = vec![0, 0];
+        let mut data = vec![vec![], vec![]];
+        let mut cache = TestSearchCache::new(2);
+
+        put_rec(trie.root, 1, &mut base, &mut check, &mut data, &mut cache);
+        return DoubleArray::from_raw_parts(base, check, data);
+    }
 
     #[test]
     fn test_single() {
-        let mut trie = Trie::new();
+        let mut trie = Trie8::new();
         trie.insert("a", 1);
         trie.insert("b", 2);
         trie.insert("c", 3);
         let count = trie.count();
-        let ary = transform(trie);
+        let ary = test_transform(trie);
         assert_eq!(count, ary.count());
         assert_eq!(&[1], ary.get("a").unwrap());
         assert_eq!(&[2], ary.get("b").unwrap());
@@ -199,7 +230,7 @@ mod tests {
 
     #[test]
     fn test_multi() {
-        let mut trie = Trie::new();
+        let mut trie = Trie8::new();
         trie.insert("a", 1);
         trie.insert("b", 2);
         trie.insert("b", 3);
@@ -207,7 +238,7 @@ mod tests {
         trie.insert("c", 5);
         trie.insert("c", 6);
         let count = trie.count();
-        let ary = transform(trie);
+        let ary = test_transform(trie);
         assert_eq!(count, ary.count());
         assert_eq!(&[1], ary.get("a").unwrap());
         assert_eq!(&[2, 3], ary.get("b").unwrap());
@@ -217,12 +248,12 @@ mod tests {
 
     #[test]
     fn test_nest() {
-        let mut trie = Trie::new();
+        let mut trie = Trie8::new();
         trie.insert("a", 1);
         trie.insert("aa", 2);
         trie.insert("aaa", 3);
         let count = trie.count();
-        let ary = transform(trie);
+        let ary = test_transform(trie);
         assert_eq!(count, ary.count());
         assert_eq!(&[1], ary.get("a").unwrap());
         assert_eq!(&[2], ary.get("aa").unwrap());
@@ -232,7 +263,7 @@ mod tests {
 
     #[test]
     fn test_multi_nest() {
-        let mut trie = Trie::new();
+        let mut trie = Trie8::new();
         trie.insert("a", 1);
         trie.insert("aa", 2);
         trie.insert("ab", 3);
@@ -240,7 +271,7 @@ mod tests {
         trie.insert("ba", 5);
         trie.insert("bb", 6);
         let count = trie.count();
-        let ary = transform(trie);
+        let ary = test_transform(trie);
         assert_eq!(count, ary.count());
         assert_eq!(&[1], ary.get("a").unwrap());
         assert_eq!(&[2], ary.get("aa").unwrap());
