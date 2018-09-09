@@ -28,7 +28,7 @@ fn line_to_info<'a>(line: &'a str) -> (&'a str, Info) {
 fn build<K, D>(file: &str)
 where
     for<'a> &'a str: AsChars<K>,
-    D: NewDictionary<K>,
+    D: SaveDict<K, Info> + Default,
 {
     let stdin = io::stdin();
     let mut dic = D::default();

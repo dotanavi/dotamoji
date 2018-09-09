@@ -1,11 +1,11 @@
 use as_chars::AsChars;
 use as_chars::AsUsize;
 use bincode;
-use dictionary::NewDictionary;
+use dictionary::SaveDict;
 use double_array::DoubleArray;
-use info::Info;
 use prefix_map::PrefixMap;
 use search_cache::*;
+use serde::Serialize;
 use std::fs::File;
 use std::io::BufWriter;
 use std::mem::swap;
@@ -60,11 +60,7 @@ impl<K: AsUsize + Ord, V> PrefixMap<K, V> for Trans<K, V> {
     }
 }
 
-impl<K: AsUsize + Ord> NewDictionary<K> for Trans<K, Info> {
-    fn load_from_file(_: &str) -> Self {
-        panic!("ファイルのロードには対応していません。");
-    }
-
+impl<K: AsUsize + Ord, V: Serialize> SaveDict<K, V> for Trans<K, V> {
     fn save_to_file(self, file: &str) -> Self {
         let file = File::create(file).expect("ファイルを作成できません。");
         let file = BufWriter::new(file);

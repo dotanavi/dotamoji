@@ -18,7 +18,7 @@ mod trie;
 
 pub use analyze::analyze;
 pub use as_chars::{AsChars, IntoString};
-pub use dictionary::NewDictionary;
+pub use dictionary::{LoadDict, SaveDict};
 pub use info::Info;
 pub use matrix::Matrix;
 pub use prefix_map::PrefixMap;

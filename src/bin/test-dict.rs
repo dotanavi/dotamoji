@@ -9,7 +9,7 @@ use dotamoji::*;
 fn test_all<K, D>(file: &str)
 where
     for<'a> &'a str: AsChars<K>,
-    D: NewDictionary<K>,
+    D: LoadDict<K, Info>,
 {
     let dic = D::load_from_file(file);
 
