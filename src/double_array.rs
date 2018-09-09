@@ -145,21 +145,13 @@ impl<K: AsUsize, V, C: SearchCache2> DoubleArray<K, V, C> {
 
     #[inline]
     fn put_first_one(&mut self, current_ix: usize, ch: K) -> usize {
-        let position = self.find_new_base_one(ch);
-        self.base[current_ix] = position as u32 - ch.as_usize() as u32;
-        return position;
-    }
-
-    #[inline]
-    fn find_new_base_one(&mut self, ch: K) -> usize {
-        for i in ch.as_usize() + 1..self.check.len() {
-            if self.check[i] == 0 {
-                return i;
-            }
+        let ch = ch.as_usize();
+        let ix = self.search_cache.find_empty(ch, &self.check);
+        if ix >= self.check.len() {
+            self.extend(ix + 1);
         }
-        let pos = max(self.check.len(), ch.as_usize() + 1);
-        self.extend(pos + 1);
-        return pos;
+        self.base[current_ix] = ix as u32 - ch as u32;
+        return ix;
     }
 
     fn rebase(&mut self, current_ix: usize, ch: K) -> usize {
@@ -216,21 +208,18 @@ impl<K: AsUsize, V, C: SearchCache2> DoubleArray<K, V, C> {
         let ch = ch.as_usize();
         let mut new_base = 0;
         'out: loop {
-            new_base += 1;
-            let mut ix = new_base + ch;
-            while ix < self.check.len() && self.check[ix] != 0 {
-                ix += 1;
-            }
+            let ix = self.search_cache.find_empty(new_base + ch, &self.check);
             new_base = ix - ch;
 
+            let mut last_ix = 0; // next_nodes は昇順のため最後の要素が最大である。
             for ch in next_nodes {
                 let new_ix = new_base + ch.as_usize();
-                if new_ix < self.check.len() && self.check[new_ix] != 0 {
+                last_ix = new_ix;
+                if self.search_cache.is_filled(new_ix, &self.check) {
                     continue 'out;
                 }
             }
-            // next_nodes は昇順のため最後の要素が最大である。
-            let last_ix = max(ix, new_base + next_nodes.last().unwrap().as_usize());
+            last_ix = max(last_ix, ix);
             if last_ix >= self.check.len() {
                 self.extend(last_ix + 1);
             }
