@@ -139,6 +139,7 @@ impl<K: AsUsize, V, C: SearchCache2> DoubleArray<K, V, C> {
     fn update(&mut self, current_ix: usize, next_ix: usize) -> usize {
         self.base[next_ix] = 0;
         self.check[next_ix] = current_ix as u32;
+        self.search_cache.mark(next_ix);
         next_ix
     }
 
@@ -182,10 +183,12 @@ impl<K: AsUsize, V, C: SearchCache2> DoubleArray<K, V, C> {
             // 3. 遷移先ノードを新しい base で計算した index にコピー
             debug_assert!(self.base[dst_ix] == 0);
             debug_assert!(self.check[dst_ix] == 0);
+            debug_assert!(!self.search_cache.is_filled(dst_ix, &self.check));
             debug_assert!(self.data[dst_ix].len() == 0);
             let src_base = self.base[src_ix] as usize;
             self.base[dst_ix] = self.base[src_ix];
             self.check[dst_ix] = self.check[src_ix];
+            self.search_cache.mark(dst_ix);
             self.data.swap(src_ix, dst_ix);
 
             if src_base > 0 {
@@ -202,6 +205,7 @@ impl<K: AsUsize, V, C: SearchCache2> DoubleArray<K, V, C> {
             // 5. 旧遷移先ノードの base, check, data をリセット
             self.base[src_ix] = 0;
             self.check[src_ix] = 0;
+            self.search_cache.unmark(src_ix);
         }
         new_base as usize + ch.as_usize()
     }
@@ -239,6 +243,7 @@ impl<K: AsUsize, V, C: SearchCache2> DoubleArray<K, V, C> {
 
         self.base.resize(size, 0);
         self.check.resize(size, 0);
+        self.search_cache.extend(size);
         let n = self.data.len();
         self.data.extend((n..size).map(|_| vec![]));
 
