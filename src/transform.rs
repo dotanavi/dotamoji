@@ -8,6 +8,7 @@ use search_cache::*;
 use serde::Serialize;
 use std::fs::File;
 use std::io::BufWriter;
+use std::io::Write;
 use std::mem::swap;
 use std::time::Instant;
 use trie::{Node, Trie};
@@ -61,10 +62,7 @@ impl<K: AsUsize + Ord, V> PrefixMap<K, V> for Trans<K, V> {
 }
 
 impl<K: AsUsize + Ord, V: Serialize> SaveDict<K, V> for Trans<K, V> {
-    fn save_to_file(self, file: &str) -> Self {
-        let file = File::create(file).expect("ファイルを作成できません。");
-        let file = BufWriter::new(file);
-
+    fn save_to_file<W: Write>(self, file: W) -> Self {
         let array = match self {
             Trans::Array(x) => x,
             Trans::Trie(x) => transform(*x).into(),

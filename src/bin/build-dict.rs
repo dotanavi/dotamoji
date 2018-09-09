@@ -1,10 +1,11 @@
 extern crate dotamoji;
 
+use dotamoji::*;
 use std::env;
+use std::fs::File;
+use std::io::BufWriter;
 use std::io::{self, BufRead};
 use std::str::FromStr;
-
-use dotamoji::*;
 
 #[inline]
 fn read_int<T: FromStr>(str: &str) -> T {
@@ -25,7 +26,7 @@ fn line_to_info<'a>(line: &'a str) -> (&'a str, Info) {
 }
 
 #[inline]
-fn build<K, D>(file: &str)
+fn build<K, D>(file_path: &str)
 where
     for<'a> &'a str: AsChars<K>,
     D: SaveDict<K, Info> + Default,
@@ -36,8 +37,16 @@ where
         let (word, info) = line_to_info(&line);
         dic.insert(word, info);
     }
-    dic.save_to_file(file);
-    println!("{} を作成しました。", file);
+    if file_path == "-" {
+        let stdout = io::stdout();
+        let handle = stdout.lock();
+        dic.save_to_file(handle);
+    } else {
+        let file = File::create(file_path).expect("ファイルを作成できません。");
+        let file = BufWriter::new(file);
+        dic.save_to_file(file);
+        println!("{} を作成しました。", file_path);
+    }
 }
 
 fn main() {
