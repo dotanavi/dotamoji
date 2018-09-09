@@ -6,8 +6,6 @@ use double_array::DoubleArray;
 use prefix_map::PrefixMap;
 use search_cache::*;
 use serde::Serialize;
-use std::fs::File;
-use std::io::BufWriter;
 use std::io::Write;
 use std::mem::swap;
 use std::time::Instant;

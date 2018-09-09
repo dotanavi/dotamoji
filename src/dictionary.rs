@@ -2,7 +2,7 @@ use bincode;
 use prefix_map::PrefixMap;
 use serde::{de::DeserializeOwned, Serialize};
 use std::fs::File;
-use std::io::{BufReader, BufWriter, Write};
+use std::io::{BufReader, Write};
 
 // -----------------------------------------------------------------------------
 
