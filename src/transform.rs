@@ -180,6 +180,7 @@ fn calc_stats_rec<K, V>(node: &Node<K, V>, table: &mut Vec<u8>) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    type Trie<V> = super::super::trie::Trie<u8, V>;
 
     #[test]
     fn test_single() {
