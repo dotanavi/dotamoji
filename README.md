@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/travis-ci/travis-web.svg?branch=master)](https://travis-ci.org/travis-ci/travis-web)
+
 ## 概要
 
 形態素解析を行うためのツールです
@@ -25,15 +27,15 @@ cargo build --release
 入力ファイルをダブル配列にして、出力ファイルに保存します。
 
 ```
-./target/release/build-dict array [出力ファイル] < [辞書テキスト]
+./target/release/build-dict array16 [出力ファイル] < [辞書テキスト]
 ```
 
 ダブル配列以外の形式にも対応しています。
 
-- `array`: ダブル配列
-- `hash`: 再帰ハッシュマップ
-- `trie`: トライ木
-- `trans`: トライ木でパース、ダブル配列として保存
+- `array16`: ダブル配列
+- `hash16`: 再帰ハッシュマップ
+- `trie16`: トライ木
+- `trans16`: トライ木でパース、ダブル配列として保存
 
 ```
 ./target/release/build-dict [変換オプション] [出力ファイル] < [辞書テキスト]
@@ -44,18 +46,18 @@ cargo build --release
 出力した辞書に全単語が載っているかをチェックします。
 
 ```
-./target/release/test-dict array [出力された辞書ファイル] < [辞書テキスト]
+./target/release/test-dict array16 [出力された辞書ファイル] < [辞書テキスト]
 ```
 
-`array` の他に、 `hash`, `trie` が利用できます。
+`array16` の他に、 `hash16`, `trie16` が利用できます。
 
 ### 形態素解析
 
 標準入力を形態素解析します。
 
 ```
-echo "すもももももももものうち" | ./target/release/analyze array [出力された辞書ファイル] [連結コストファイル]
+echo "すもももももももものうち" | ./target/release/analyze array16 [出力された辞書ファイル] [連結コストファイル]
 ```
 
-`array` の他に、 `hash`, `trie` が利用できます。
+`array16` の他に、 `hash16`, `trie16` が利用できます。
 
