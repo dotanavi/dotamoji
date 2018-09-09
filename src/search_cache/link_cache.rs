@@ -61,17 +61,17 @@ impl SearchCache for LinkCache {
     }
 
     #[inline]
-    fn find_empty(&self, ch: usize, search_start: usize, _check: &[u32]) -> usize {
+    fn find_empty(&self, search_start: usize, _check: &[u32]) -> usize {
         let links = &self.next_links;
 
-        let mut ix = ch + search_start;
+        let mut ix = search_start;
         if ix < links.len() && links[ix] != 0 {
-            return links[ix] as usize - ch;
+            return links[ix] as usize;
         }
         ix += 1;
         while ix < links.len() && links[ix] == 0 {
             ix += 1;
         }
-        return ix - ch;
+        return ix;
     }
 }

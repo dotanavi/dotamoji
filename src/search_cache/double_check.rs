@@ -35,9 +35,9 @@ impl<C1: SearchCache, C2: SearchCache> SearchCache for DoubleCheck<C1, C2> {
     }
 
     #[inline]
-    fn find_empty(&self, ch: usize, search_start: usize, check: &[u32]) -> usize {
-        let value1 = self.cache1.find_empty(ch, search_start, check);
-        let value2 = self.cache2.find_empty(ch, search_start, check);
+    fn find_empty(&self, search_start: usize, check: &[u32]) -> usize {
+        let value1 = self.cache1.find_empty(search_start, check);
+        let value2 = self.cache2.find_empty(search_start, check);
         assert_eq!(value1, value2);
         return value1;
     }

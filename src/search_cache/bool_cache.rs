@@ -25,16 +25,16 @@ impl SearchCache for BoolCache {
     }
 
     #[inline]
-    fn find_empty(&self, ch: usize, search_start: usize, _check: &[u32]) -> usize {
+    fn find_empty(&self, search_start: usize, _check: &[u32]) -> usize {
         let cache = &self.0;
 
-        let start_pos = ch + search_start + 1;
+        let start_pos = search_start + 1;
         if start_pos < cache.len() {
             if let Some(ix) = cache[start_pos..].iter().position(|&x| !x) {
-                return ix + search_start + 1;
+                return ix + start_pos;
             }
-            return cache.len() - ch;
+            return cache.len();
         }
-        return start_pos - ch;
+        return start_pos;
     }
 }

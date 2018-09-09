@@ -20,11 +20,11 @@ impl SearchCache for NoCache {
     }
 
     #[inline]
-    fn find_empty(&self, ch: usize, search_start: usize, check: &[u32]) -> usize {
-        let mut ix = ch + search_start + 1;
+    fn find_empty(&self, search_start: usize, check: &[u32]) -> usize {
+        let mut ix = search_start + 1;
         while ix < check.len() && check[ix] != 0 {
             ix += 1;
         }
-        return ix - ch;
+        return ix;
     }
 }

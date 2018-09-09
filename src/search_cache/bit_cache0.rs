@@ -40,12 +40,12 @@ impl SearchCache for BitCache {
     }
 
     #[inline]
-    fn find_empty(&self, ch: usize, search_start: usize, _check: &[u32]) -> usize {
+    fn find_empty(&self, search_start: usize, _check: &[u32]) -> usize {
         let data = &self.0;
-        let ix = ch + search_start + 1;
+        let ix = search_start + 1;
         let a = ix / NUM_BITS;
         if a >= data.len() {
-            return ix - ch;
+            return ix;
         }
 
         let b = ix % NUM_BITS;
@@ -53,7 +53,7 @@ impl SearchCache for BitCache {
             let masked = data[a] & (!0 << b);
             if masked != 0 {
                 let b = Bits::trailing_zeros(masked) as usize;
-                return a * NUM_BITS + b - ch;
+                return a * NUM_BITS + b;
             }
         }
 
@@ -61,11 +61,11 @@ impl SearchCache for BitCache {
         while a < data.len() {
             if data[a] != 0 {
                 let b = Bits::trailing_zeros(data[a]) as usize;
-                return a * NUM_BITS + b - ch;
+                return a * NUM_BITS + b;
             }
             a += 1;
         }
 
-        return a * NUM_BITS + b - ch;
+        return a * NUM_BITS + b;
     }
 }

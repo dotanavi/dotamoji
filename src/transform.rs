@@ -118,7 +118,7 @@ fn put_rec<K: AsUsize, V, C: SearchCache>(
 
         let mut index = 0;
         'outer: loop {
-            index = cache.find_empty(ch, index, check);
+            index = cache.find_empty(ch + index, check) - ch;
             for &(ch, _) in &node.children[1..] {
                 if cache.is_filled(index + ch.as_usize(), check) {
                     continue 'outer;
