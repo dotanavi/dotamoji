@@ -19,3 +19,7 @@ pub trait SearchCache {
     fn is_filled(&self, index: usize, check: &[u32]) -> bool;
     fn find_empty(&self, search_start: usize, check: &[u32]) -> usize;
 }
+
+pub trait SearchCache2: SearchCache {
+    fn unmark(&mut self, index: usize);
+}

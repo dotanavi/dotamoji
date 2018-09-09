@@ -1,6 +1,6 @@
 use as_chars::{AsChars, AsUsize};
 use prefix_map::PrefixMap;
-use search_cache::{NoCache, SearchCache};
+use search_cache::{NoCache, SearchCache2};
 use std::cmp::{max, min};
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -23,7 +23,7 @@ pub struct DoubleArray<K, V, C> {
     search_cache: C,
 }
 
-impl<K, V, C: SearchCache> DoubleArray<K, V, C> {
+impl<K, V, C: SearchCache2> DoubleArray<K, V, C> {
     #[inline]
     pub fn new() -> Self {
         DoubleArray {
@@ -49,7 +49,7 @@ impl<K: AsUsize, V> DoubleArray<K, V, NoCache> {
     }
 }
 
-impl<K: AsUsize, V, C: SearchCache> DoubleArray<K, V, C> {
+impl<K: AsUsize, V, C: SearchCache2> DoubleArray<K, V, C> {
     #[inline]
     pub fn count(&self) -> usize {
         self.data.iter().map(|v| v.len()).sum()
@@ -269,14 +269,14 @@ impl<K, V: Debug, C> DoubleArray<K, V, C> {
     }
 }
 
-impl<K, V, C: SearchCache> Default for DoubleArray<K, V, C> {
+impl<K, V, C: SearchCache2> Default for DoubleArray<K, V, C> {
     #[inline]
     fn default() -> Self {
         DoubleArray::new()
     }
 }
 
-impl<K: AsUsize, V, C: SearchCache> PrefixMap<K, V> for DoubleArray<K, V, C> {
+impl<K: AsUsize, V, C: SearchCache2> PrefixMap<K, V> for DoubleArray<K, V, C> {
     #[inline]
     fn count(&self) -> usize {
         self.count()

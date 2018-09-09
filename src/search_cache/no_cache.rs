@@ -1,4 +1,4 @@
-use super::SearchCache;
+use super::{SearchCache, SearchCache2};
 
 #[derive(Serialize, Deserialize)]
 pub struct NoCache;
@@ -28,4 +28,9 @@ impl SearchCache for NoCache {
         }
         return ix;
     }
+}
+
+impl SearchCache2 for NoCache {
+    #[inline]
+    fn unmark(&mut self, _index: usize) {}
 }
