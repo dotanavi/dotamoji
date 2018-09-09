@@ -19,10 +19,11 @@ mod trie;
 pub use analyze::analyze;
 pub use as_chars::{AsChars, IntoString};
 pub use dictionary::{LoadDict, SaveDict};
-pub use double_array::DoubleArray;
 pub use info::Info;
 pub use matrix::Matrix;
 pub use prefix_map::PrefixMap;
 pub use recursive_hash_map::RecursiveHashMap;
 pub use transform::Trans;
 pub use trie::Trie;
+
+pub type DoubleArray<K, V> = double_array::DoubleArray<K, V, search_cache::NoCache>;

@@ -1,5 +1,6 @@
 use as_chars::{AsChars, AsUsize};
 use prefix_map::PrefixMap;
+use search_cache::{NoCache, SearchCache};
 use std::cmp::{max, min};
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -14,14 +15,15 @@ enum Index {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct DoubleArray<K, V> {
+pub struct DoubleArray<K, V, C> {
     base: Vec<u32>,
     check: Vec<u32>,
     data: Vec<Vec<V>>,
     phantom: PhantomData<K>,
+    search_cache: C,
 }
 
-impl<K, V> DoubleArray<K, V> {
+impl<K, V, C: SearchCache> DoubleArray<K, V, C> {
     #[inline]
     pub fn new() -> Self {
         DoubleArray {
@@ -29,11 +31,12 @@ impl<K, V> DoubleArray<K, V> {
             check: vec![0, 0],
             data: vec![vec![], vec![]],
             phantom: PhantomData,
+            search_cache: C::new(2),
         }
     }
 }
 
-impl<K: AsUsize, V> DoubleArray<K, V> {
+impl<K: AsUsize, V> DoubleArray<K, V, NoCache> {
     #[inline]
     pub fn from_raw_parts(base: Vec<u32>, check: Vec<u32>, data: Vec<Vec<V>>) -> Self {
         Self {
@@ -41,11 +44,12 @@ impl<K: AsUsize, V> DoubleArray<K, V> {
             check,
             data,
             phantom: PhantomData,
+            search_cache: NoCache,
         }
     }
 }
 
-impl<K: AsUsize, V> DoubleArray<K, V> {
+impl<K: AsUsize, V, C: SearchCache> DoubleArray<K, V, C> {
     #[inline]
     pub fn count(&self) -> usize {
         self.data.iter().map(|v| v.len()).sum()
@@ -244,7 +248,7 @@ impl<K: AsUsize, V> DoubleArray<K, V> {
     }
 }
 
-impl<K, V: Debug> DoubleArray<K, V> {
+impl<K, V: Debug, C> DoubleArray<K, V, C> {
     pub fn show_debug(&self) {
         use std::char::from_u32;
 
@@ -265,14 +269,14 @@ impl<K, V: Debug> DoubleArray<K, V> {
     }
 }
 
-impl<K, V> Default for DoubleArray<K, V> {
+impl<K, V, C: SearchCache> Default for DoubleArray<K, V, C> {
     #[inline]
     fn default() -> Self {
         DoubleArray::new()
     }
 }
 
-impl<K: AsUsize, V> PrefixMap<K, V> for DoubleArray<K, V> {
+impl<K: AsUsize, V, C: SearchCache> PrefixMap<K, V> for DoubleArray<K, V, C> {
     #[inline]
     fn count(&self) -> usize {
         self.count()
@@ -296,7 +300,9 @@ impl<K: AsUsize, V> PrefixMap<K, V> for DoubleArray<K, V> {
 
 #[cfg(test)]
 mod tests {
-    type DoubleArray<T> = super::DoubleArray<u8, T>;
+    use search_cache::NoCache;
+
+    type DoubleArray<T> = super::DoubleArray<u8, T, NoCache>;
 
     #[test]
     // "未登録の要素を取り出そうとするとNoneを返す"

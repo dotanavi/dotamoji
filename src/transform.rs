@@ -12,7 +12,7 @@ use std::time::Instant;
 use trie::{Node, Trie};
 
 pub enum Trans<K, V> {
-    Array(Box<DoubleArray<K, V>>),
+    Array(Box<DoubleArray<K, V, NoCache>>),
     Trie(Box<Trie<K, V>>),
 }
 
@@ -70,7 +70,7 @@ impl<K: AsUsize + Ord, V: Serialize> SaveDict<K, V> for Trans<K, V> {
     }
 }
 
-pub fn transform<K: AsUsize, V>(trie: Trie<K, V>) -> DoubleArray<K, V> {
+pub fn transform<K: AsUsize, V>(trie: Trie<K, V>) -> DoubleArray<K, V, NoCache> {
     // show_stats(&trie.root);
 
     let mut base = vec![0, 0];
@@ -195,7 +195,7 @@ mod tests {
         );
     }
 
-    pub fn test_transform<K: AsUsize, V>(trie: Trie<K, V>) -> DoubleArray<K, V> {
+    pub fn test_transform<K: AsUsize, V>(trie: Trie<K, V>) -> DoubleArray<K, V, NoCache> {
         let mut base = vec![0, 0];
         let mut check = vec![0, 0];
         let mut data = vec![vec![], vec![]];
