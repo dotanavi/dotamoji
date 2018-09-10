@@ -69,6 +69,6 @@ impl SearchCache for BitCache {
             a += 1;
         }
 
-        return a * NUM_BITS + 1;
+        return a * NUM_BITS;
     }
 }
