@@ -16,9 +16,9 @@ enum Index {
 
 #[derive(Serialize, Deserialize)]
 pub struct DoubleArray<K, V, C> {
-    base: Vec<u32>,
-    check: Vec<u32>,
-    data: Vec<Vec<V>>,
+    pub(crate) base: Vec<u32>,
+    pub(crate) check: Vec<u32>,
+    pub(crate) data: Vec<Vec<V>>,
     phantom: PhantomData<K>,
     search_cache: C,
 }

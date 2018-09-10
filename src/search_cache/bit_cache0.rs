@@ -1,6 +1,6 @@
 use std::mem::size_of;
 
-use super::SearchCache;
+use super::{SearchCache, SearchCache2};
 
 type Bits = usize;
 
@@ -65,5 +65,14 @@ impl SearchCache for BitCache {
         }
 
         return a * NUM_BITS;
+    }
+}
+
+impl SearchCache2 for BitCache {
+    #[inline]
+    fn unmark(&mut self, index: usize) {
+        let a = index / NUM_BITS;
+        let b = index % NUM_BITS;
+        self.0[a] |= 1 << b;
     }
 }
