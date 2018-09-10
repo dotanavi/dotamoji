@@ -3,6 +3,7 @@ use dictionary::SaveDict;
 use prefix_map::PrefixMap;
 use std::io::Write;
 use std::marker::PhantomData;
+use std::time::Instant;
 
 pub trait Transform<M1, M2> {
     fn transform(src: M1) -> M2;
@@ -67,7 +68,12 @@ where
 {
     fn save_to_file<W: Write>(self, file: W) -> Self {
         let dic = match self {
-            Before(x, _) => Tr::transform(x),
+            Before(x, _) => {
+                let start = Instant::now();
+                let x = Tr::transform(x);
+                eprintln!("transform: {:?}", start.elapsed());
+                x
+            }
             After(x) => x,
         };
         After(dic.save_to_file(file))

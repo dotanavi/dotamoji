@@ -71,6 +71,8 @@ fn main() {
         "trans8" => build::<u8, Trie2DAMap<u8, Info>>(&file),
         "trans16" => build::<u16, Trie2DAMap<u16, Info>>(&file),
         "trans32" => build::<char, Trie2DAMap<char, Info>>(&file),
+        "fast8" => build::<u8, FastBuildDoubleArray<u8, Info>>(&file),
+        "fast16" => build::<u16, FastBuildDoubleArray<u16, Info>>(&file),
         _ => panic!("不明なタイプです。"),
     }
 }

@@ -4,7 +4,6 @@ use double_array::DoubleArray;
 use prefix_map::PrefixMap;
 use search_cache::*;
 use std::mem::swap;
-use std::time::Instant;
 use transform_map::Transform;
 use transform_map::TransformMap;
 use trie::{Node, Trie};
@@ -33,9 +32,7 @@ pub fn transform<K: AsUsize, V>(trie: Trie<K, V>) -> DoubleArray<K, V, NoCache> 
     let mut cache = BitCache1::new(2);
     // let mut cache = DoubleCheck::<BitCache0, BitCache1>::new(2);
 
-    let start = Instant::now();
     put_rec(trie.root, 1, &mut base, &mut check, &mut data, &mut cache);
-    eprintln!("transform: {:?}", start.elapsed());
     return DoubleArray::from_raw_parts(base, check, data);
 }
 
