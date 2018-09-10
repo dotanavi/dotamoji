@@ -9,6 +9,7 @@ use serde::Serialize;
 use std::io::Write;
 use std::mem::swap;
 use std::time::Instant;
+use transform_map::Transform;
 use trie::{Node, Trie};
 
 pub enum Trans<K, V> {
@@ -67,6 +68,14 @@ impl<K: AsUsize + Ord, V: Serialize> SaveDict<K, V> for Trans<K, V> {
         };
         bincode::serialize_into(file, &array).expect("保存に失敗しました。");
         Trans::Array(array)
+    }
+}
+
+pub enum Trie2DoubleArray {}
+
+impl<K: AsUsize, V> Transform<Trie<K, V>, DoubleArray<K, V, NoCache>> for Trie2DoubleArray {
+    fn transform(trie: Trie<K, V>) -> DoubleArray<K, V, NoCache> {
+        transform(trie)
     }
 }
 
