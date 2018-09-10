@@ -1,75 +1,15 @@
-use as_chars::AsChars;
 use as_chars::AsUsize;
-use bincode;
-use dictionary::SaveDict;
 use double_array::DoubleArray;
+#[allow(unused_imports)]
 use prefix_map::PrefixMap;
 use search_cache::*;
-use serde::Serialize;
-use std::io::Write;
 use std::mem::swap;
 use std::time::Instant;
 use transform_map::Transform;
+use transform_map::TransformMap;
 use trie::{Node, Trie};
 
-pub enum Trans<K, V> {
-    Array(Box<DoubleArray<K, V, NoCache>>),
-    Trie(Box<Trie<K, V>>),
-}
-
-impl<K, V> Default for Trans<K, V> {
-    #[inline]
-    fn default() -> Self {
-        Trans::Trie(Box::new(Trie::new()))
-    }
-}
-
-impl<K: AsUsize + Ord, V> PrefixMap<K, V> for Trans<K, V> {
-    #[inline]
-    fn count(&self) -> usize {
-        match self {
-            Trans::Array(ref x) => x.count(),
-            Trans::Trie(ref x) => x.count(),
-        }
-    }
-
-    #[inline]
-    fn get<T: AsChars<K>>(&self, key: T) -> Option<&[V]> {
-        match self {
-            Trans::Array(ref x) => x.get(key),
-            Trans::Trie(ref x) => x.get(key),
-        }
-    }
-
-    #[inline]
-    fn insert<T: AsChars<K>>(&mut self, key: T, value: V) {
-        match self {
-            Trans::Array(ref mut x) => x.insert(key, value),
-            Trans::Trie(ref mut x) => x.insert(key, value),
-        }
-    }
-
-    #[inline]
-    fn each_prefix<T: AsChars<K>, F: FnMut(usize, &[V])>(&self, key: T, f: F) {
-        use std::ops::Deref;
-
-        match self {
-            Trans::Array(ref x) => PrefixMap::each_prefix(x.deref(), key, f),
-            Trans::Trie(ref x) => x.each_prefix(key, f),
-        }
-    }
-}
-
-impl<K: AsUsize + Ord, V: Serialize> SaveDict<K, V> for Trans<K, V> {
-    fn save_to_file<W: Write>(self, file: W) -> Self {
-        let array = match self {
-            Trans::Array(x) => x,
-            Trans::Trie(x) => transform(*x).into(),
-        };
-        bincode::serialize_into(file, &array).expect("保存に失敗しました。");
-        Trans::Array(array)
-    }
-}
+pub type Trie2DAMap<K, V> = TransformMap<Trie<K, V>, DoubleArray<K, V, NoCache>, Trie2DoubleArray>;
 
 pub enum Trie2DoubleArray {}
 
