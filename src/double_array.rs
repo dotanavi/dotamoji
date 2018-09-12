@@ -202,29 +202,19 @@ impl<K: AsUsize, V, C: SearchCache2> DoubleArray<K, V, C> {
         new_base as usize + ch.as_usize()
     }
 
+    #[inline]
     fn find_new_base(&mut self, next_nodes: &[K], ch: K) -> usize {
         debug_assert!(next_nodes.len() > 0);
 
         let ch = ch.as_usize();
-        let mut new_base = 0;
-        'out: loop {
-            let ix = self.search_cache.find_empty(new_base + ch, &self.check);
-            new_base = ix - ch;
-
-            let mut last_ix = 0; // next_nodes は昇順のため最後の要素が最大である。
-            for ch in next_nodes {
-                let new_ix = new_base + ch.as_usize();
-                last_ix = new_ix;
-                if self.search_cache.is_filled(new_ix, &self.check) {
-                    continue 'out;
-                }
-            }
-            last_ix = max(last_ix, ix);
-            if last_ix >= self.check.len() {
-                self.extend(last_ix + 1);
-            }
-            return new_base;
+        let new_base = self.search_cache.find_all_empties(&self.check, ch, next_nodes, |k| k.as_usize());
+        // next_nodes は昇順のため最後の要素が最大である。
+        let max_ch = max(ch, next_nodes.last().unwrap().as_usize());
+        let len = new_base + max_ch + 1;
+        if len > self.check.len() {
+            self.extend(len);
         }
+        return new_base;
     }
 
     fn extend(&mut self, size: usize) {
