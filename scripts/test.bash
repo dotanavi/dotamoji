@@ -1,7 +1,8 @@
 #!/bin/bash
 
-src_type="trans16"
-dst_type="array16"
+src_type="array16"
+dst_type=
+# dst_type="array16"
 src="../dic/All.csv"
 dst="tmp/tmp.bin"
 
