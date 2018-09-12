@@ -207,7 +207,9 @@ impl<K: AsUsize, V, C: SearchCache2> DoubleArray<K, V, C> {
         debug_assert!(next_nodes.len() > 0);
 
         let ch = ch.as_usize();
-        let new_base = self.search_cache.find_all_empties(&self.check, ch, next_nodes, |k| k.as_usize());
+        let new_base = self
+            .search_cache
+            .find_all_empties(&self.check, ch, next_nodes, |k| k.as_usize());
         // next_nodes は昇順のため最後の要素が最大である。
         let max_ch = max(ch, next_nodes.last().unwrap().as_usize());
         let len = new_base + max_ch + 1;
