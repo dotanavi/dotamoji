@@ -51,20 +51,8 @@ fn put_rec<K: AsUsize, V, C: SearchCache>(
         return;
     }
 
-    let new_base = {
-        let ch = node.children[0].0.as_usize();
-
-        let mut index = 0;
-        'outer: loop {
-            index = cache.find_empty(ch + index, check) - ch;
-            for &(ch, _) in &node.children[1..] {
-                if cache.is_filled(index + ch.as_usize(), check) {
-                    continue 'outer;
-                }
-            }
-            break index;
-        }
-    };
+    let ch = node.children[0].0.as_usize();
+    let new_base = cache.find_all_empties(check, ch, &node.children[1..], |x| x.0.as_usize());
     base[base_index] = new_base as u32;
 
     let requred_size = new_base + node.children.last().unwrap().0.as_usize() + 1;
