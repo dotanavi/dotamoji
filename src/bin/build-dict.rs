@@ -52,12 +52,8 @@ where
 fn main() {
     let mut args = env::args();
     let _ = args.next().expect("実行ファイルが不明！？");
-    let dictype = args
-        .next()
-        .expect("タイプが指定されていません。");
-    let file = args
-        .next()
-        .expect("ファイルが指定されていません。");
+    let dictype = args.next().expect("タイプが指定されていません。");
+    let file = args.next().expect("ファイルが指定されていません。");
 
     match dictype.as_str() {
         "array8" => build::<u8, DoubleArray<u8, Info>>(&file),

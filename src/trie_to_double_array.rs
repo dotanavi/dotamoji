@@ -132,8 +132,7 @@ mod tests {
 
         assert_eq!(
             size_of::<TestSearchCache>(),
-            (0
-                + size_of::<BitCache0>()
+            (0 + size_of::<BitCache0>()
                 + size_of::<BitCache1>()
                 + size_of::<BoolCache>()
                 + size_of::<LinkCache>()
