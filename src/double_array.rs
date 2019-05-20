@@ -188,7 +188,7 @@ impl<K: AsUsize, V, C: SearchCache2> DoubleArray<K, V, C> {
                 let src_ix = src_ix as u32;
                 let dst_ix = dst_ix as u32;
                 let range = src_base..min(self.check.len(), src_base + K::MAX);
-                for mut c in &mut self.check[range] {
+                for c in &mut self.check[range] {
                     if *c == src_ix {
                         *c = dst_ix
                     }

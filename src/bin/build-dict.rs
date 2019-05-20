@@ -1,4 +1,4 @@
-extern crate dotamoji;
+
 
 use dotamoji::*;
 use std::env;

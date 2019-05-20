@@ -1,8 +1,8 @@
 #[macro_use]
 extern crate serde_derive;
-extern crate bincode;
-extern crate fnv;
-extern crate serde;
+
+
+
 
 mod analyze;
 mod as_chars;

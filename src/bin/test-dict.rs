@@ -1,4 +1,4 @@
-extern crate dotamoji;
+
 
 use std::env;
 use std::io::{self, BufRead};

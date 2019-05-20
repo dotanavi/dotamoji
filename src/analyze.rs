@@ -29,7 +29,7 @@ pub struct Analyzed<K> {
 
 impl<K> Analyzed<K> {
     #[inline]
-    pub fn iter(&self) -> Iter<K> {
+    pub fn iter(&self) -> Iter<'_, K> {
         Iter {
             x: self.index,
             y: 0,
@@ -38,13 +38,13 @@ impl<K> Analyzed<K> {
     }
 }
 
-pub struct Token<'a, K: 'a> {
+pub struct Token<'a, K> {
     pub word: &'a [K],
     pub id: u16,
     pub cost: i32,
 }
 
-pub struct Iter<'a, K: 'a> {
+pub struct Iter<'a, K> {
     x: u8,
     y: u32,
     analyzed: &'a Analyzed<K>,
