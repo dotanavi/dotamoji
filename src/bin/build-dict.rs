@@ -1,5 +1,3 @@
-
-
 use dotamoji::*;
 use std::env;
 use std::fs::File;

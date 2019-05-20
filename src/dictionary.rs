@@ -1,5 +1,5 @@
-use bincode;
 use crate::prefix_map::PrefixMap;
+use bincode;
 use serde::{de::DeserializeOwned, Serialize};
 use std::fs::File;
 use std::io::{BufReader, Write};

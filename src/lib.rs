@@ -1,9 +1,6 @@
 #[macro_use]
 extern crate serde_derive;
 
-
-
-
 mod analyze;
 mod as_chars;
 mod dictionary;

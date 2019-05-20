@@ -3,10 +3,10 @@ use crate::double_array::DoubleArray;
 #[allow(unused_imports)]
 use crate::prefix_map::PrefixMap;
 use crate::search_cache::*;
-use std::mem::swap;
 use crate::transform_map::Transform;
 use crate::transform_map::TransformMap;
 use crate::trie::{Node, Trie};
+use std::mem::swap;
 
 pub type Trie2DAMap<K, V> = TransformMap<Trie<K, V>, DoubleArray<K, V, NoCache>, Trie2DoubleArray>;
 
