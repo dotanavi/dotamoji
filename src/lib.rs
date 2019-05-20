@@ -18,15 +18,15 @@ mod transform_map;
 mod trie;
 mod trie_to_double_array;
 
-pub use analyze::analyze;
-pub use as_chars::{AsChars, IntoString};
-pub use dictionary::{LoadDict, SaveDict};
-pub use fast_build_double_array::FastBuildDoubleArray;
-pub use info::Info;
-pub use matrix::Matrix;
-pub use prefix_map::PrefixMap;
-pub use recursive_hash_map::RecursiveHashMap;
-pub use trie::Trie;
-pub use trie_to_double_array::Trie2DAMap;
+pub use crate::analyze::analyze;
+pub use crate::as_chars::{AsChars, IntoString};
+pub use crate::dictionary::{LoadDict, SaveDict};
+pub use crate::fast_build_double_array::FastBuildDoubleArray;
+pub use crate::info::Info;
+pub use crate::matrix::Matrix;
+pub use crate::prefix_map::PrefixMap;
+pub use crate::recursive_hash_map::RecursiveHashMap;
+pub use crate::trie::Trie;
+pub use crate::trie_to_double_array::Trie2DAMap;
 
 pub type DoubleArray<K, V> = double_array::DoubleArray<K, V, search_cache::NoCache>;

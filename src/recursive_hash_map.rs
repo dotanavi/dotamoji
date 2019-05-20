@@ -1,7 +1,7 @@
 use fnv::FnvHashMap as HashMap;
 // use std::collections::HashMap;
-use as_chars::AsChars;
-use prefix_map::PrefixMap;
+use crate::as_chars::AsChars;
+use crate::prefix_map::PrefixMap;
 use std::hash::Hash;
 
 #[derive(Serialize, Deserialize)]

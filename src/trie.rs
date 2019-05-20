@@ -1,5 +1,5 @@
-use as_chars::AsChars;
-use prefix_map::PrefixMap;
+use crate::as_chars::AsChars;
+use crate::prefix_map::PrefixMap;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Node<K, V> {

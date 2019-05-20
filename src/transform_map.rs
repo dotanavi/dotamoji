@@ -1,6 +1,6 @@
-use as_chars::AsChars;
-use dictionary::SaveDict;
-use prefix_map::PrefixMap;
+use crate::as_chars::AsChars;
+use crate::dictionary::SaveDict;
+use crate::prefix_map::PrefixMap;
 use std::io::Write;
 use std::marker::PhantomData;
 use std::time::Instant;

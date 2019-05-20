@@ -1,4 +1,4 @@
-use as_chars::AsChars;
+use crate::as_chars::AsChars;
 
 pub trait PrefixMap<K, V> {
     fn count(&self) -> usize;

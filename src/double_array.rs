@@ -1,6 +1,6 @@
-use as_chars::{AsChars, AsUsize};
-use prefix_map::PrefixMap;
-use search_cache::{NoCache, SearchCache2};
+use crate::as_chars::{AsChars, AsUsize};
+use crate::prefix_map::PrefixMap;
+use crate::search_cache::{NoCache, SearchCache2};
 use std::cmp::{max, min};
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -294,7 +294,7 @@ impl<K: AsUsize, V, C: SearchCache2> PrefixMap<K, V> for DoubleArray<K, V, C> {
 
 #[cfg(test)]
 mod tests {
-    use search_cache::NoCache;
+    use crate::search_cache::NoCache;
 
     type DoubleArray<T> = super::DoubleArray<u8, T, NoCache>;
 

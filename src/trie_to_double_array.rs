@@ -1,12 +1,12 @@
-use as_chars::AsUsize;
-use double_array::DoubleArray;
+use crate::as_chars::AsUsize;
+use crate::double_array::DoubleArray;
 #[allow(unused_imports)]
-use prefix_map::PrefixMap;
-use search_cache::*;
+use crate::prefix_map::PrefixMap;
+use crate::search_cache::*;
 use std::mem::swap;
-use transform_map::Transform;
-use transform_map::TransformMap;
-use trie::{Node, Trie};
+use crate::transform_map::Transform;
+use crate::transform_map::TransformMap;
+use crate::trie::{Node, Trie};
 
 pub type Trie2DAMap<K, V> = TransformMap<Trie<K, V>, DoubleArray<K, V, NoCache>, Trie2DoubleArray>;
 

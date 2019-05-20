@@ -1,7 +1,7 @@
-use as_chars::AsUsize;
-use double_array::DoubleArray;
-use search_cache::{BitCache1, NoCache, SearchCache2};
-use transform_map::{Transform, TransformMap};
+use crate::as_chars::AsUsize;
+use crate::double_array::DoubleArray;
+use crate::search_cache::{BitCache1, NoCache, SearchCache2};
+use crate::transform_map::{Transform, TransformMap};
 
 pub enum Shrink {}
 
