@@ -42,6 +42,6 @@ build hash8
 build hash16
 build hash32
 build fast8 array8
-build fast16 array16
-build array8
+# build fast16 array16
+# build array8
 build array16
